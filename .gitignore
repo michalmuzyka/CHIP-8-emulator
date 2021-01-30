@@ -31,10 +31,13 @@
 *.out
 *.app
 
+.vs/
 Debug/
 Release/
 CHIP8/Debug/
 CHIP8/Release/
+CHIP8/*.ch8
+!CHIP8/
 
 *.vcxproj
 *.vcxproj.filters
