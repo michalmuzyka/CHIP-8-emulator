@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+Debug/
+Release/
+CHIP8/Debug/
+CHIP8/Release/
+
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
