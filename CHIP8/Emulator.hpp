@@ -7,7 +7,7 @@ class Emulator
 public:
     Emulator();
 
-    bool load_program_from_file(std::string path);
+    bool load_program_from_file(const std::string &path);
     void run_program();
     void update();
 
