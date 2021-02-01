@@ -10,8 +10,10 @@ Emulator::Emulator() {
 bool Emulator::load_program_from_file(const std::string& path) {
     std::ifstream program_file(path, std::ios::in | std::ios::binary);
 
-    if (!program_file.is_open())
+    if (!program_file.is_open()) {
+        if(logger) logger->log(MESSAGE_TYPE::ERROR, "Can't open program file");
         return false;
+    }
 
     int instruction_counter = 0;
 
@@ -20,6 +22,7 @@ bool Emulator::load_program_from_file(const std::string& path) {
 
         if (instruction_counter == ROM_SIZE) {
             memset(ROM, 0, ROM_SIZE*2);
+            if (logger) logger->log(MESSAGE_TYPE::ERROR, "File is too big to load to ROM");
             return false;
         }
     }
@@ -34,4 +37,8 @@ void Emulator::run_program() {
 void Emulator::update() {
     delay_timer = delay_timer ? delay_timer - 1 : 0;
     sound_timer = sound_timer ? sound_timer - 1 : 0;
+}
+
+void Emulator::link_logger(Logger* logger) {
+    this->logger = logger;
 }
