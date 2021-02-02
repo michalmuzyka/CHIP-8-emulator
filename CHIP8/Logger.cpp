@@ -1,17 +1,19 @@
-#include "Logger.h"
+#include "Logger.hpp"
 #include <iostream>
 #include <fstream>
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <cstdlib>
 
 Logger::Logger(const std::string &log_file_path)
-    :log_file_path(log_file_path)
+    :log_file_path{ log_file_path }
 {
 }
 
 void Logger::log(MESSAGE_TYPE type, const std::string &message) const {
     std::ostream* out_stream;
+
 #ifdef _DEBUG
     out_stream = &std::clog;
 #else
@@ -19,6 +21,7 @@ void Logger::log(MESSAGE_TYPE type, const std::string &message) const {
     if (!logfile.is_open()) return;
     out_stream = &logfile;
 #endif
+
     const auto now = std::chrono::system_clock::now();
     auto now_in_time_t = std::chrono::system_clock::to_time_t(now);
     tm time_tm;
@@ -30,4 +33,7 @@ void Logger::log(MESSAGE_TYPE type, const std::string &message) const {
         case MESSAGE_TYPE::ERROR: *out_stream << "ERROR:"; break;
     }
     *out_stream << message << std::endl;
+
+    if (type == MESSAGE_TYPE::ERROR)
+        exit(1);
 }

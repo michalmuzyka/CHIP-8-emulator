@@ -3,7 +3,9 @@
 #include <cstring>
 #include <iostream>
 
-Emulator::Emulator() {
+Emulator::Emulator(Logger* logger, Display* display)
+    :logger{ logger }, display{ display }
+{
     load_program_from_file("test_opcode.ch8");
 }
 
@@ -37,12 +39,4 @@ void Emulator::run_program() {
 void Emulator::update() {
     delay_timer = delay_timer ? delay_timer - 1 : 0;
     sound_timer = sound_timer ? sound_timer - 1 : 0;
-}
-
-void Emulator::link_logger(Logger* logger) {
-    this->logger = logger;
-}
-
-void Emulator::link_display(Display* display) {
-    this->display = display;
 }

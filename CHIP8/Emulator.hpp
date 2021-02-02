@@ -7,13 +7,11 @@
 class Emulator
 {
 public:
-    Emulator();
+    Emulator(Logger* logger, Display* display);
 
     bool load_program_from_file(const std::string &path);
     void run_program();
     void update();
-    void link_logger(Logger* logger);
-    void link_display(Display* display);
 
 private:
     static const unsigned ROM_SIZE = 2048;
