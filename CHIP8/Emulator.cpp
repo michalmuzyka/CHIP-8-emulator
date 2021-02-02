@@ -33,7 +33,7 @@ bool Emulator::load_program_from_file(const std::string& path) {
 }
 
 void Emulator::run_program() {
-    
+
 }
 
 void Emulator::update() {
