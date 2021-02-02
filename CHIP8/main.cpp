@@ -4,16 +4,16 @@
 int main()
 {
     Logger logger("log_file");
-    GameDisplay display("CHIP_8 emulator", 800, 600, &logger);
+    GameDisplay game_display("CHIP_8 emulator", 800, 600, &logger);
 
-    Emulator emulator(&logger, &display);
+    Emulator emulator(&logger, &game_display);
     emulator.run_program();
 
-    while(display.isOpen()){
+    while(game_display.isOpen()){
         emulator.update();
-        display.handleEvents();
+        game_display.handleEvents();
 
-        display.display();
+        game_display.display();
     }
 
     return 0;

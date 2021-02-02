@@ -18,13 +18,11 @@ void Display::handleEvents() {
 }
 
 bool Display::isOpen() const {
-    return !window.isOpen();
+    return window.isOpen();
 }
-
 
 GameDisplay::GameDisplay(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger)
     :Display(window_title, window_width, window_height, logger) {
-    
 }
 
 void GameDisplay::display() {
