@@ -1,13 +1,15 @@
 #include "Emulator.hpp"
-#include "Logger.h"
+#include "Logger.hpp"
 
 int main()
 {
-    Logger logger("log");
+    Logger logger("log_file");
+    Display display("CHIP_8 emulator", 800, 600);
+
     Emulator emulator;
     emulator.link_logger(&logger);
-
-
+    emulator.link_display(&display);
+    emulator.run_program();
 
     return 0;
 }

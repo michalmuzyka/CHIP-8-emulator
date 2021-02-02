@@ -42,3 +42,7 @@ void Emulator::update() {
 void Emulator::link_logger(Logger* logger) {
     this->logger = logger;
 }
+
+void Emulator::link_display(Display* display) {
+    this->display = display;
+}

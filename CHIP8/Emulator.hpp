@@ -1,7 +1,8 @@
 #pragma once
 #include <stack>
 #include <string>
-#include "Logger.h"
+#include "Logger.hpp"
+#include "Display.hpp"
 
 class Emulator
 {
@@ -12,6 +13,7 @@ public:
     void run_program();
     void update();
     void link_logger(Logger* logger);
+    void link_display(Display* display);
 
 private:
     static const unsigned ROM_SIZE = 2048;
@@ -27,4 +29,5 @@ private:
     std::stack<char[2]> stack;
 
     Logger* logger;
+    Display* display;
 };
