@@ -2,12 +2,13 @@
 #include <stack>
 #include <string>
 #include "Logger.hpp"
-#include "Display.hpp"
+#include "Window.hpp"
+#include "Keyboard.hpp"
 
 class Emulator
 {
 public:
-    Emulator(Logger* logger, Display* display);
+    Emulator(Logger* logger, Window* display, Keyboard* keyboard);
 
     bool load_program_from_file(const std::string &path);
     void run_program();
@@ -26,6 +27,7 @@ private:
     unsigned char sound_timer {0};
     std::stack<char[2]> stack;
 
-    Logger* logger;
-    Display* display;
+    Logger *logger;
+    Window *window;
+    Keyboard *keyboard;
 };

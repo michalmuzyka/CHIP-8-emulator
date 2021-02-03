@@ -3,8 +3,8 @@
 #include <cstring>
 #include <iostream>
 
-Emulator::Emulator(Logger* logger, Display* display)
-    :logger{ logger }, display{ display }
+Emulator::Emulator(Logger* logger, Window* window, Keyboard* keyboard)
+    :logger{ logger }, window{ window }, keyboard{ keyboard }
 {
     load_program_from_file("test_opcode.ch8");
 }
@@ -33,7 +33,7 @@ bool Emulator::load_program_from_file(const std::string& path) {
 }
 
 void Emulator::run_program() {
-
+    //TODO 
 }
 
 void Emulator::update() {

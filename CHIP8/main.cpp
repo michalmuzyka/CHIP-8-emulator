@@ -4,16 +4,21 @@
 int main()
 {
     Logger logger("log_file");
-    GameDisplay game_display("CHIP_8 emulator", 800, 600, &logger);
 
-    Emulator emulator(&logger, &game_display);
+    Keyboard keyboard;
+
+    GameWindow game_window("CHIP_8 emulator", 800, 600, &logger);
+    game_window.link_keyboard(&keyboard);
+
+    Emulator emulator(&logger, &game_window, &keyboard);
     emulator.run_program();
 
-    while(game_display.isOpen()){
-        emulator.update();
-        game_display.handleEvents();
+    while(game_window.is_open()){
+        game_window.handle_events();
+        game_window.display();
 
-        game_display.display();
+        keyboard.update();
+        emulator.update();
     }
 
     return 0;

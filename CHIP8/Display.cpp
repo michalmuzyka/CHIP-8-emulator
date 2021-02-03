@@ -1,7 +1,7 @@
-#include "Display.hpp"
+#include "Window.hpp"
 #include <SFML/Window/Event.hpp>
 
-Display::Display(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger)
+Window::Window(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger)
     :logger{ logger } {
     window.create(sf::VideoMode{ window_width, window_height }, window_title);
 
@@ -9,7 +9,7 @@ Display::Display(const std::string& window_title, const unsigned& window_width, 
         logger->log(MESSAGE_TYPE::ERROR, "Error, unable to open a window");
 }
 
-void Display::handleEvents() {
+void Window::handle_events() {
     sf::Event event;
     while(window.pollEvent(event)){
         if (event.type == sf::Event::Closed)
@@ -17,15 +17,19 @@ void Display::handleEvents() {
     }
 }
 
-bool Display::isOpen() const {
+bool Window::is_open() const {
     return window.isOpen();
 }
 
-GameDisplay::GameDisplay(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger)
-    :Display(window_title, window_width, window_height, logger) {
+void Window::link_keyboard(Keyboard *keyboard) {
+    this->keyboard = keyboard;
 }
 
-void GameDisplay::display() {
+GameWindow::GameWindow(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger)
+    :Window{ window_title, window_width, window_height, logger } {
+}
+
+void GameWindow::display() {
     window.clear(sf::Color::Black);
 
 
