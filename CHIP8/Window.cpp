@@ -4,6 +4,8 @@
 Window::Window(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger)
     :logger{ logger } {
     window.create(sf::VideoMode{ window_width, window_height }, window_title);
+    window.setKeyRepeatEnabled(false);
+    window.setFramerateLimit(60);
 
     if (logger && !window.isOpen())
         logger->log(MESSAGE_TYPE::ERROR, "Error, unable to open a window");
@@ -14,6 +16,8 @@ void Window::handle_events() {
     while(window.pollEvent(event)){
         if (event.type == sf::Event::Closed)
             window.close();
+        if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased)
+            if (keyboard) keyboard->handle_keyboard_events(event);
     }
 }
 

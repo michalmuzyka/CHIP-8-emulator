@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Emulator.hpp"
 #include "Logger.hpp"
 
@@ -17,7 +19,6 @@ int main()
         game_window.handle_events();
         game_window.display();
 
-        keyboard.update();
         emulator.update();
     }
 
