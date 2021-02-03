@@ -5,11 +5,8 @@
 class Keyboard
 {
 public:
-    Keyboard();
-
     void handle_keyboard_events(sf::Event event);
-
-    bool isPressed(sf::Keyboard::Key symbol);
+    bool is_pressed(sf::Keyboard::Key symbol);
 private:
     std::unordered_map<sf::Keyboard::Key, bool> pressed_keys;
 };
