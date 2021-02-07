@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "Window.hpp"
 #include "Keyboard.hpp"
+#include "Parser.hpp"
 
 class Emulator
 {
@@ -19,7 +20,7 @@ private:
     static const unsigned RAM_SIZE = 4096;
 
     unsigned char RAM[RAM_SIZE] {0};
-    unsigned char ROM[ROM_SIZE][2] {{0,0}};
+    Command ROM[ROM_SIZE];
     unsigned char V[16] {0};
     unsigned char I[2] {0};
     unsigned char PC[2] {0};
@@ -30,4 +31,6 @@ private:
     Logger *logger;
     Window *window;
     Keyboard *keyboard;
+
+    void execute_command();
 };

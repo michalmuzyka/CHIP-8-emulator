@@ -18,12 +18,13 @@ bool Emulator::load_program_from_file(const std::string& path) {
     }
 
     int instruction_counter = 0;
-
-    while(program_file.read(reinterpret_cast<char*>(ROM[instruction_counter]), 2)){
+    unsigned char buffer[2];
+    while(program_file.read(reinterpret_cast<char*>(buffer), 2)){
         ++instruction_counter;
+        ROM[instruction_counter] = Parser::parse(buffer);
 
         if (instruction_counter == ROM_SIZE) {
-            memset(ROM, 0, ROM_SIZE*2);
+            memset(ROM, 0, ROM_SIZE*sizeof(Command));
             if (logger) logger->log(MESSAGE_TYPE::ERROR, "File is too big to load to ROM");
             return false;
         }
