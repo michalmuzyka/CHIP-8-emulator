@@ -5,6 +5,8 @@
 
 int main()
 {
+    std::cout << sizeof(Opcode) << '\n';
+
     Logger logger("log_file");
 
     Keyboard keyboard;
