@@ -11,12 +11,13 @@ public:
     Emulator(Logger* logger, Window* display, Keyboard* keyboard);
 
     bool load_program_from_file(const std::string &path);
-    void run_program();
+    void execute_current_line();
     void update();
 
 private:
-    static const unsigned ROM_SIZE = 2048;
-    std::unique_ptr<Opcode> program[ROM_SIZE];
+    static const unsigned ROM_SIZE{ 2048 };
+    Opcode program[ROM_SIZE];
+    unsigned instruction_count{ 0 };
 
     Devices devices;
 };

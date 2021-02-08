@@ -11,6 +11,7 @@ void Opcode::create_from_binary(const unsigned char opcode[2]) {
     hex_chars[2] = (opcode[1] & 0b11110000) >> 4;
     hex_chars[3] = opcode[1] & 0b1111;
 
+
     execute = [](Devices* dev) {};
 
 }
