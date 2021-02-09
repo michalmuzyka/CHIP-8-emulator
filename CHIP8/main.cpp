@@ -15,7 +15,6 @@ int main()
     game_window.link_keyboard(&keyboard);
 
     Emulator emulator(&logger, &game_window, &keyboard);
-    emulator.run_program();
 
     while(game_window.is_open()){
         game_window.handle_events();

@@ -26,5 +26,7 @@ class GameWindow :public Window
 public:
     GameWindow(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger);
 
+    void clear();
+
     void display() override;
 };

@@ -8,7 +8,7 @@
 class Emulator
 {
 public:
-    Emulator(Logger* logger, Window* display, Keyboard* keyboard);
+    Emulator(Logger* logger, GameWindow* display, Keyboard* keyboard);
 
     bool load_program_from_file(const std::string &path);
     void execute_current_line();

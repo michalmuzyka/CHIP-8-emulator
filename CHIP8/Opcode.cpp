@@ -1,12 +1,7 @@
 #include "Opcode.hpp"
 
-Opcode::Opcode(const Opcode& c) {
-    for (int i = 0; i < SIZE; ++i)
-        hex_chars[i] = c.hex_chars[i];
-    execute = c.execute;
-}
-
 void Opcode::create_from_binary(const unsigned char opcode[2]) {
+    unsigned char hex_chars[4];
     hex_chars[0] = (opcode[0] & 0b11110000) >> 4;
     hex_chars[1] = opcode[0] & 0b1111;
     hex_chars[2] = (opcode[1] & 0b11110000) >> 4;
@@ -14,13 +9,22 @@ void Opcode::create_from_binary(const unsigned char opcode[2]) {
 
     switch (hex_chars[0]) {
         case 0x0:
-            if(hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0x0)
-                execute = [](Devices* dev) {};
-            else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE)
-                execute = [](Devices* dev) {};
+            if(hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0x0) //00E0, display clear
+                execute = [](Devices* dev) { dev->window->clear(); };
+            else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE) //00EE, return from subroutine
+                execute = [](Devices* dev){
+                    if (dev->stack.empty()) dev->logger->log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
+                    dev->PC = dev->stack.top();
+                    dev->stack.pop();
+                    dev->PC_should_be_increment = false;
+                };
             break;
         case 0x1: 
-            execute = [](Devices* dev) {};
+            execute = [hex_chars](Devices* dev){
+                const int add = (hex_chars[1] << 8) + (hex_chars[2] << 4) + hex_chars[3];
+                dev->PC = add;
+                dev->PC_should_be_increment = false;
+            };
             break;
         case 0x2: 
             execute = [](Devices* dev) {};

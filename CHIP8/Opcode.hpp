@@ -13,11 +13,11 @@ struct Devices
     unsigned PC{ 0 };
     unsigned char delay_timer{ 0 };
     unsigned char sound_timer{ 0 };
-    std::stack<char[2]> stack;
+    std::stack<int> stack;
 
     bool PC_should_be_increment{true};
 
-    Window* window;
+    GameWindow* window;
     Keyboard* keyboard;
     Logger* logger;
 };
@@ -26,13 +26,8 @@ class Opcode
 {
 public:
     Opcode() = default;
-    Opcode(const Opcode & c);
 
     void create_from_binary(const unsigned char opcode[2]);
 
     std::function<void(Devices*)> execute;
-
-private:
-    static const unsigned SIZE = 4;
-    unsigned char hex_chars[SIZE];
 };
