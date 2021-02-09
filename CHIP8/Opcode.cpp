@@ -1,5 +1,9 @@
 #include "Opcode.hpp"
 
+int Opcode::get_PC_address_from_binary(const unsigned char hex_chars[4]) {
+    return (hex_chars[1] << 8) + (hex_chars[2] << 4) + hex_chars[3] - 0x200;
+}
+
 void Opcode::create_from_binary(const unsigned char opcode[2]) {
     unsigned char hex_chars[4];
     hex_chars[0] = (opcode[0] & 0b11110000) >> 4;
@@ -21,8 +25,8 @@ void Opcode::create_from_binary(const unsigned char opcode[2]) {
             break;
         case 0x1: 
             execute = [hex_chars](Devices* dev){
-                const int add = (hex_chars[1] << 8) + (hex_chars[2] << 4) + hex_chars[3];
-                dev->PC = add;
+                const int address = get_PC_address_from_binary(hex_chars);
+                dev->PC = address;
                 dev->PC_should_be_increment = false;
             };
             break;

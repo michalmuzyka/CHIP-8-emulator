@@ -3,10 +3,17 @@
 #include <cstring>
 #include <iostream>
 
-Emulator::Emulator(Logger* logger, Window* window, Keyboard* keyboard)
+Emulator::Emulator(Logger* logger, GameWindow* window, Keyboard* keyboard)
 {
     devices.window = window;
     devices.keyboard = keyboard;
+
+    unsigned char font[] = {
+
+
+
+    };
+
 
     load_program_from_file("test_opcode.ch8");
 }

@@ -30,4 +30,7 @@ public:
     void create_from_binary(const unsigned char opcode[2]);
 
     std::function<void(Devices*)> execute;
+private:
+    static int get_PC_address_from_binary(const unsigned char hex_chars[4]);
+
 };
