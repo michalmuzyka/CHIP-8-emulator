@@ -15,7 +15,7 @@ public:
     void execute_current_line();
     void update();
 
-private:
+//private:
     unsigned last_instruction_addr{ 0x200 };
 
     static const unsigned RAM_SIZE = 4096;

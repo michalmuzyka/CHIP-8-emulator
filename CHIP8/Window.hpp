@@ -35,13 +35,13 @@ class GameWindow :public Window
     const sf::Vector2i pixel_size;
     const sf::Color pixel_color{ sf::Color::White };
 
-    std::vector<std::vector<bool>> pixels_drew;
+    std::vector<std::vector<unsigned char>> pixels_drew;
 
 public:
     GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger);
 
-    bool draw_pixel_row(sf::Vector2i at, const unsigned char& row);
     void clear();
+    bool draw_pixels_row(sf::Vector2i at, const unsigned char& row);
 
     void display() override;
 };

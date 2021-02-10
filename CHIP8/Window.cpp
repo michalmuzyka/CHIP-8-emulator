@@ -1,4 +1,8 @@
 #include "Window.hpp"
+
+
+#include <bitset>
+#include <iostream>
 #include <SFML/Window/Event.hpp>
 
 Window::Window(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* log)
@@ -35,7 +39,7 @@ GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size,
      display_pixel_size{ display_pixel_size },
      pixel(sf::Vector2f{ pixel_size }),
      pixel_size{ pixel_size },
-     pixels_drew( display_pixel_size.y, std::vector<bool>(display_pixel_size.x, false))
+     pixels_drew( display_pixel_size.y, std::vector<unsigned char>(display_pixel_size.x, 0))
 {
     board_texture.create(pixel_size.x * display_pixel_size.x, pixel_size.y * display_pixel_size.y);
     board_texture.setSmooth(false);
@@ -46,21 +50,41 @@ GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size,
 
 void GameWindow::clear() {
     board_texture.clear(background_color);
-
     for(auto& row : pixels_drew)
-        row = std::vector<bool>(display_pixel_size.x, false);
+        row = std::vector<unsigned char>(display_pixel_size.x, 0);
 }
 
 bool GameWindow::draw_pixels_row(sf::Vector2i at, const unsigned char &row) {
-    bool pixel_changed = false;
+    std::cout << std::bitset<8>(row) << '\n';
+    at.y %= display_pixel_size.y;
+    bool pixel_erased = false;
+    unsigned char mask = 0b10000000;
+    
+    for (int i = 0; i < 8; ++i) {
+        unsigned char bit = (row & mask) >> (8 - 1 - i); // char is 8bit long
+        at.x = (at.x + 1) % display_pixel_size.x;
 
+        if (pixels_drew[at.y][at.x] == 1 && bit == 0)
+            pixel_erased = true;
 
+        pixels_drew[at.y][at.x] = bit;
 
+        if (pixels_drew[at.y][at.x])
+            pixel.setFillColor(pixel_color);
+        else
+            pixel.setFillColor(background_color);
+        pixel.setPosition(at.x*pixel_size.x, at.y*pixel_size.y);
+        board_texture.draw(pixel);
 
+        mask >>= 1;
+    }
+
+    return pixel_erased;
 }
 
 void GameWindow::display() {
     window.clear(sf::Color::Black);
+    board_texture.display();
     game_board.setTexture(board_texture.getTexture());
     window.draw(game_board);
     window.display();

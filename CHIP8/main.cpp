@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Emulator.hpp"
 
 int main()
@@ -12,6 +14,7 @@ int main()
     Emulator emulator(&logger, &game_window, &keyboard);
 
     while(game_window.is_open()){
+
         game_window.handle_events();
         game_window.display();
 

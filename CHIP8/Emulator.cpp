@@ -69,6 +69,8 @@ void Emulator::update() {
 }
 
 void Emulator::execute_current_line() {
+    std::cout << std::hex << (int)RAM[PC] << (int)RAM[PC + 1] << '\n';
+
     unsigned char hex_chars[4];
     hex_chars[0] = (RAM[PC] & 0b11110000) >> 4;
     hex_chars[1] = RAM[PC] & 0b1111;
@@ -139,12 +141,12 @@ void Emulator::opcodes5(const unsigned char hex_chars[4]) {
 
 void Emulator::opcodes6(const unsigned char hex_chars[4]) {
     // 6XNN, Vx = NN
-    V[hex_chars[2]] = get_constant_from_binary(hex_chars);
+    V[hex_chars[1]] = get_constant_from_binary(hex_chars);
 }
 
 void Emulator::opcodes7(const unsigned char hex_chars[4]) {
     // 7XNN, Vx += NN
-    V[hex_chars[2]] += get_constant_from_binary(hex_chars);
+    V[hex_chars[1]] += get_constant_from_binary(hex_chars);
 }
 
 void Emulator::opcodes8(const unsigned char hex_chars[4]) {
@@ -178,8 +180,8 @@ void Emulator::opcodes8(const unsigned char hex_chars[4]) {
         V[hex_chars[1]] = V[hex_chars[2]] - V[hex_chars[1]];
         break;
     case 0xE:  // 8XYE, Vx <<= 1
-        V[0xF] = V[hex_chars[2]] & 0b10000000;
-        V[hex_chars[2]] <<= 1;
+        V[0xF] = V[hex_chars[1]] & 0b10000000;
+        V[hex_chars[1]] <<= 1;
         break;
     }
 }
@@ -203,15 +205,15 @@ void Emulator::opcodesB(const unsigned char hex_chars[4]) {
 
 void Emulator::opcodesC(const unsigned char hex_chars[4]) {
     // CNNN, Vx = rand()%NN
-    const std::uniform_int_distribution<unsigned char> uniform_dist(0, get_constant_from_binary(hex_chars));
+    const std::uniform_int_distribution<int> uniform_dist(0, static_cast<int>(get_constant_from_binary(hex_chars)));
     V[hex_chars[1]] = uniform_dist(generator);
 }
 
 void Emulator::opcodesD(const unsigned char hex_chars[4]) {
     // DXYN, display
     bool pixel_changed = false;
-    for (unsigned i = 0x0; i <= hex_chars[3]; ++i)
-        pixel_changed |= window->draw_pixel_row(sf::Vector2i{ hex_chars[1], hex_chars[2] }, RAM[I + i]);
+    for (unsigned char i = 0x0; i < hex_chars[3]; ++i)
+        pixel_changed |= window->draw_pixels_row(sf::Vector2i{ V[hex_chars[1]], V[hex_chars[2]]+i }, RAM[I + i]);
 
     V[0xF] = pixel_changed ? 1 : 0;
 }
@@ -250,10 +252,12 @@ void Emulator::opcodesF(const unsigned char hex_chars[4]) {
     else if (hex_chars[2] == 0x5 && hex_chars[3] == 0x5) { // FX55
         for (unsigned i = 0x0; i <= hex_chars[1]; ++i)
             RAM[I + i] = V[i];
+        I += hex_chars[1];
     }
     else if (hex_chars[2] == 0x6 && hex_chars[3] == 0x5) { // FX65
         for (unsigned i = 0x0; i <= hex_chars[1]; ++i)
             V[i] = RAM[I + i];
+        I += hex_chars[1];
     }
 }
 
