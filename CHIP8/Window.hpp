@@ -35,7 +35,7 @@ class GameWindow :public Window
     const sf::Vector2i pixel_size;
     const sf::Color pixel_color{ sf::Color::White };
 
-    std::vector<std::vector<unsigned char>> pixels_drew;
+    std::vector<std::vector<unsigned char>> drawn_pixels;
 
 public:
     GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger);

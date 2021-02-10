@@ -69,8 +69,6 @@ void Emulator::update() {
 }
 
 void Emulator::execute_current_line() {
-    std::cout << std::hex << (int)RAM[PC] << (int)RAM[PC + 1] << '\n';
-
     unsigned char hex_chars[4];
     hex_chars[0] = (RAM[PC] & 0b11110000) >> 4;
     hex_chars[1] = RAM[PC] & 0b1111;
@@ -233,8 +231,7 @@ void Emulator::opcodesF(const unsigned char hex_chars[4]) {
     if (hex_chars[2] == 0x0 && hex_chars[3] == 0x7) // FX07, set Vx to delay timer
         V[hex_chars[1]] = delay_timer;
     else if (hex_chars[2] == 0x0 && hex_chars[3] == 0xA) {  // FX0A, block until key pressed
-        if (keyboard->is_any_pressed())
-            PC_should_be_increment = false;
+        PC_should_be_increment = keyboard->is_any_pressed();
     }
     else if (hex_chars[2] == 0x1 && hex_chars[3] == 0x5) // FX15, set delay timer to Vx
         delay_timer = V[hex_chars[1]];
