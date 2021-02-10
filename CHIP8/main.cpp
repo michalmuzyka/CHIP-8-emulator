@@ -1,17 +1,12 @@
-#include <iostream>
-
 #include "Emulator.hpp"
-#include "Logger.hpp"
 
 int main()
 {
-    std::cout << sizeof(Opcode) << '\n';
-
     Logger logger("log_file");
 
     Keyboard keyboard;
 
-    GameWindow game_window("CHIP_8 emulator", 800, 600, &logger);
+    GameWindow game_window("CHIP_8 emulator", sf::Vector2i{ 8,8 }, sf::Vector2i{ 64, 32 }, &logger);
     game_window.link_keyboard(&keyboard);
 
     Emulator emulator(&logger, &game_window, &keyboard);

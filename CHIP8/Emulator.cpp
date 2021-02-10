@@ -2,11 +2,15 @@
 #include <fstream>
 #include <cstring>
 #include <iostream>
+#include <chrono>
 
 Emulator::Emulator(Logger* logger, GameWindow* window, Keyboard* keyboard)
-    :logger{logger}, window{window}, keyboard{keyboard}
+    :logger{ logger },
+    window{ window },
+    keyboard{ keyboard },
+    generator{ std::chrono::high_resolution_clock::now().time_since_epoch().count() }
 {
-    unsigned char font[] = {
+    unsigned char font[FONT_CHAR_COUNT*FONT_CHAR_SIZE] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, //0
         0x20, 0x60, 0x20, 0x20, 0x70, //1
         0xF0, 0x10, 0xF0, 0x80, 0xF0, //2
@@ -25,7 +29,7 @@ Emulator::Emulator(Logger* logger, GameWindow* window, Keyboard* keyboard)
         0xF0, 0x80, 0xF0, 0x80, 0x80  //F
     };
 
-    memcpy(RAM + 0x50, font, 80);
+    memcpy(RAM + FONT_LOCATION, font, FONT_CHAR_COUNT* FONT_CHAR_SIZE);
 
     load_program_from_file("test_opcode.ch8");
 }
@@ -72,125 +76,185 @@ void Emulator::execute_current_line() {
     hex_chars[3] = RAM[PC + 1] & 0b1111;
 
     switch (hex_chars[0]) {
-        case 0x0:
-            if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0x0) //00E0, display clear
-                window->clear();
-            else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE){ //00EE, return from subroutine
-                if (stack.empty()) logger->log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
-                PC = stack.top();
-                stack.pop();
-            }
-            break;
-        case 0x1: // 1NNN, jump to address
-            PC = get_address_from_binary(hex_chars);
-            PC_should_be_increment = false;
-            break;
-        case 0x2: // 2NNN, run subroutine
-            stack.push(PC);
-            PC = get_address_from_binary(hex_chars);
-            PC_should_be_increment = false;
-            break;
-        case 0x3: // 3XNN, skip if Vx == NN  
-            if (V[hex_chars[1]] == get_constant_from_binary(hex_chars))
-                PC += 2;
-            break;
-        case 0x4: // 4XNN, skip if Vx != NN 
-            if (V[hex_chars[1]] != get_constant_from_binary(hex_chars))
-                PC += 2;
-            break;
-        case 0x5: // 5XY0, skip if Vx == Vy
-            if (V[hex_chars[1]] == V[hex_chars[2]])
-                PC += 2;
-            break;
-        case 0x6: // 6XNN, set Vx = NN
-            V[hex_chars[2]] = get_constant_from_binary(hex_chars);
-            break;
-        case 0x7: // 7XNN, Vx += NN
-            V[hex_chars[2]] += get_constant_from_binary(hex_chars);
-            break;
-        case 0x8: 
-            switch (hex_chars[3]) {
-                case 0x0: // 8XY0, Vx = Vy
-                    V[hex_chars[1]] = V[hex_chars[2]];
-                    break;
-                case 0x1:  // 8XY1, Vx = Vx OR Vy
-                    V[hex_chars[1]] |= V[hex_chars[2]];
-                    break;
-                case 0x2:  // 8XY2, Vx = Vx AND Vy 
-                    V[hex_chars[1]] &= V[hex_chars[2]];
-                    break;
-                case 0x3:  // 8XY3, Vx = Vx XOR Vy
-                    V[hex_chars[1]] ^= V[hex_chars[2]];
-                    break;
-                case 0x4:  // 8XY4, Vx += Vy
-                    V[0xF] = static_cast<int>(V[hex_chars[1]]) + static_cast<int>(V[hex_chars[2]]) > UCHAR_MAX ? 1 : 0;
-                    V[hex_chars[1]] += V[hex_chars[2]];
-                    break;
-                case 0x5:  // 8XY5, Vx -= Vy
-                    V[0xF] = static_cast<int>(V[hex_chars[1]]) - static_cast<int>(V[hex_chars[2]]) < 0 ? 1 : 0;
-                    V[hex_chars[1]] -= V[hex_chars[2]];
-                    break;
-                case 0x6:  // 8XY6, Vx >>= 1
-                    V[0xF] = V[hex_chars[1]] & 0b1;
-                    V[hex_chars[1]] >>= 1;
-                    break;
-                case 0x7:  // 8XY7, Vx = Vy - Vx
-                    V[0xF] = static_cast<int>(V[hex_chars[2]]) - static_cast<int>(V[hex_chars[1]]) < 0 ? 1 : 0;
-                    V[hex_chars[1]] = V[hex_chars[2]] - V[hex_chars[1]];
-                    break;
-                case 0xE:  // 8XYE, Vx <<= 1
-                    V[0xF] = V[hex_chars[2]] & 0b10000000;
-                    V[hex_chars[2]] <<= 1;
-                    break;
-            }
-            break;
-        case 0x9: 
-            if (hex_chars[3] == 0x0)  // 9XY0, skip if Vx != Vy
-                if (V[hex_chars[1]] != V[hex_chars[2]])
-                    PC += 2;
-            break;
-        case 0xA: // ANNN, set I to address
-            I = get_address_from_binary(hex_chars);
-            break;
-        case 0xB: // BNNN, jump to adress + V0
-            PC = static_cast<int>(V[0]) + get_address_from_binary(hex_chars);
-            PC_should_be_increment = false;
-            break;
-        case 0xC: // CNNN, Vx = rand()%NN
-            const std::uniform_int_distribution<unsigned char> uniform_dist(0, get_constant_from_binary(hex_chars));
-            V[hex_chars[1]] = uniform_dist(generator);
-            break;
-        case 0xD: // DXYN, display
-            
-            break;
-        case 0xE: 
-            if (hex_chars[2] == 0x9 && hex_chars[3] == 0xE) // EX9E, skips next if key from Vx is pressed
-                
-            else if (hex_chars[2] == 0xA && hex_chars[3] == 0x1) // EXA1, skips next if key from Vx isnt pressed
-                
-            break;
-        case 0xF:
-            if (hex_chars[2] == 0x0 && hex_chars[3] == 0x7) // FX07, sets delay timer to Vx
-
-            else if (hex_chars[2] == 0x0 && hex_chars[3] == 0xA)  // FX0A, block until key pressed
-
-            else if (hex_chars[2] == 0x1 && hex_chars[3] == 0x5) // FX15, sets delay timer to Vx
-                delay_timer = V[hex_chars[1]];
-            else if (hex_chars[2] == 0x1 && hex_chars[3] == 0x8) // FX15, sets sound timer to Vx
-                sound_timer = V[hex_chars[1]];
-            else if (hex_chars[2] == 0x1 && hex_chars[3] == 0xE) // FX1E, I += Vx
-                I += V[hex_chars[1]];
-            else if (hex_chars[2] == 0x2 && hex_chars[3] == 0x9) // FX29
-               
-            else if (hex_chars[2] == 0x3 && hex_chars[3] == 0x3) // FX33 
-                
-            else if (hex_chars[2] == 0x5 && hex_chars[3] == 0x5) // FX55
-                
-            else if (hex_chars[2] == 0x6 && hex_chars[3] == 0x5) // FX65
-                
-            break;
+        case 0x0: opcodes0(hex_chars); break;
+        case 0x1: opcodes1(hex_chars); break;
+        case 0x2: opcodes2(hex_chars); break;
+        case 0x3: opcodes3(hex_chars); break;
+        case 0x4: opcodes4(hex_chars); break;
+        case 0x5: opcodes5(hex_chars); break;
+        case 0x6: opcodes6(hex_chars); break;
+        case 0x7: opcodes7(hex_chars); break;
+        case 0x8: opcodes8(hex_chars); break;
+        case 0x9: opcodes9(hex_chars); break;
+        case 0xA: opcodesA(hex_chars); break;
+        case 0xB: opcodesB(hex_chars); break;
+        case 0xC: opcodesC(hex_chars); break;
+        case 0xD: opcodesD(hex_chars); break;
+        case 0xE: opcodesE(hex_chars); break;
+        case 0xF: opcodesF(hex_chars); break;
     }
     PC_should_be_increment ? PC += 2 : PC_should_be_increment = true;
+}
+
+void Emulator::opcodes0(const unsigned char hex_chars[4]) {
+    if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0x0) //00E0, clear display
+        window->clear();
+    else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE) { //00EE, return from subroutine
+        if (stack.empty()) logger->log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
+        PC = stack.top();
+        stack.pop();
+    }
+}
+
+void Emulator::opcodes1(const unsigned char hex_chars[4]) {
+    //1NNN, jump to address
+    PC = get_address_from_binary(hex_chars);
+    PC_should_be_increment = false;
+}
+
+void Emulator::opcodes2(const unsigned char hex_chars[4]) {
+    // 2NNN, run subroutine
+    stack.push(PC);
+    PC = get_address_from_binary(hex_chars);
+    PC_should_be_increment = false;
+}
+
+void Emulator::opcodes3(const unsigned char hex_chars[4]) {
+    // 3XNN, skip if Vx == NN  
+    if (V[hex_chars[1]] == get_constant_from_binary(hex_chars))
+        PC += 2;
+}
+
+void Emulator::opcodes4(const unsigned char hex_chars[4]) {
+    // 4XNN, skip if Vx != NN 
+    if (V[hex_chars[1]] != get_constant_from_binary(hex_chars))
+        PC += 2;
+}
+
+void Emulator::opcodes5(const unsigned char hex_chars[4]) {
+    // 5XY0, skip if Vx == Vy
+    if (V[hex_chars[1]] == V[hex_chars[2]])
+        PC += 2;
+}
+
+void Emulator::opcodes6(const unsigned char hex_chars[4]) {
+    // 6XNN, Vx = NN
+    V[hex_chars[2]] = get_constant_from_binary(hex_chars);
+}
+
+void Emulator::opcodes7(const unsigned char hex_chars[4]) {
+    // 7XNN, Vx += NN
+    V[hex_chars[2]] += get_constant_from_binary(hex_chars);
+}
+
+void Emulator::opcodes8(const unsigned char hex_chars[4]) {
+    switch (hex_chars[3]) {
+    case 0x0: // 8XY0, Vx = Vy
+        V[hex_chars[1]] = V[hex_chars[2]];
+        break;
+    case 0x1:  // 8XY1, Vx = Vx OR Vy
+        V[hex_chars[1]] |= V[hex_chars[2]];
+        break;
+    case 0x2:  // 8XY2, Vx = Vx AND Vy 
+        V[hex_chars[1]] &= V[hex_chars[2]];
+        break;
+    case 0x3:  // 8XY3, Vx = Vx XOR Vy
+        V[hex_chars[1]] ^= V[hex_chars[2]];
+        break;
+    case 0x4:  // 8XY4, Vx += Vy
+        V[0xF] = static_cast<int>(V[hex_chars[1]]) + static_cast<int>(V[hex_chars[2]]) > UCHAR_MAX ? 1 : 0;
+        V[hex_chars[1]] += V[hex_chars[2]];
+        break;
+    case 0x5:  // 8XY5, Vx -= Vy
+        V[0xF] = static_cast<int>(V[hex_chars[1]]) > static_cast<int>(V[hex_chars[2]]) ? 1 : 0;
+        V[hex_chars[1]] -= V[hex_chars[2]];
+        break;
+    case 0x6:  // 8XY6, Vx >>= 1
+        V[0xF] = V[hex_chars[1]] & 0b1;
+        V[hex_chars[1]] >>= 1;
+        break;
+    case 0x7:  // 8XY7, Vx = Vy - Vx
+        V[0xF] = static_cast<int>(V[hex_chars[2]]) - static_cast<int>(V[hex_chars[1]]) < 0 ? 1 : 0;
+        V[hex_chars[1]] = V[hex_chars[2]] - V[hex_chars[1]];
+        break;
+    case 0xE:  // 8XYE, Vx <<= 1
+        V[0xF] = V[hex_chars[2]] & 0b10000000;
+        V[hex_chars[2]] <<= 1;
+        break;
+    }
+}
+
+void Emulator::opcodes9(const unsigned char hex_chars[4]) {
+    if (hex_chars[3] == 0x0)  // 9XY0, skip if Vx != Vy
+        if (V[hex_chars[1]] != V[hex_chars[2]])
+            PC += 2;
+}
+
+void Emulator::opcodesA(const unsigned char hex_chars[4]) {
+    // ANNN, set I to address
+    I = get_address_from_binary(hex_chars);
+}
+
+void Emulator::opcodesB(const unsigned char hex_chars[4]) {
+    // BNNN, jump to address + V0
+    PC = static_cast<int>(V[0]) + get_address_from_binary(hex_chars);
+    PC_should_be_increment = false;
+}
+
+void Emulator::opcodesC(const unsigned char hex_chars[4]) {
+    // CNNN, Vx = rand()%NN
+    const std::uniform_int_distribution<unsigned char> uniform_dist(0, get_constant_from_binary(hex_chars));
+    V[hex_chars[1]] = uniform_dist(generator);
+}
+
+void Emulator::opcodesD(const unsigned char hex_chars[4]) {
+    // DXYN, display
+    bool pixel_changed = false;
+    for (unsigned i = 0x0; i <= hex_chars[3]; ++i)
+        pixel_changed |= window->draw_pixel_row(sf::Vector2i{ hex_chars[1], hex_chars[2] }, RAM[I + i]);
+
+    V[0xF] = pixel_changed ? 1 : 0;
+}
+
+void Emulator::opcodesE(const unsigned char hex_chars[4]) {
+    if (hex_chars[2] == 0x9 && hex_chars[3] == 0xE) { // EX9E, skip next if key from Vx is pressed
+        if (keyboard->CHIP8_key_is_pressed(V[hex_chars[1]]))
+            PC += 2;
+    }
+    else if (hex_chars[2] == 0xA && hex_chars[3] == 0x1) { // EXA1, skip next if key from Vx isnt pressed
+        if (!keyboard->CHIP8_key_is_pressed(V[hex_chars[1]]))
+            PC += 2;
+    }
+}
+
+void Emulator::opcodesF(const unsigned char hex_chars[4]) {
+    if (hex_chars[2] == 0x0 && hex_chars[3] == 0x7) // FX07, set Vx to delay timer
+        V[hex_chars[1]] = delay_timer;
+    else if (hex_chars[2] == 0x0 && hex_chars[3] == 0xA) {  // FX0A, block until key pressed
+        if (keyboard->is_any_pressed())
+            PC_should_be_increment = false;
+    }
+    else if (hex_chars[2] == 0x1 && hex_chars[3] == 0x5) // FX15, set delay timer to Vx
+        delay_timer = V[hex_chars[1]];
+    else if (hex_chars[2] == 0x1 && hex_chars[3] == 0x8) // FX15, set sound timer to Vx
+        sound_timer = V[hex_chars[1]];
+    else if (hex_chars[2] == 0x1 && hex_chars[3] == 0xE) // FX1E, I += Vx
+        I += V[hex_chars[1]];
+    else if (hex_chars[2] == 0x2 && hex_chars[3] == 0x9) // FX29, I = location of sprite for digit stored in Vx
+        I = FONT_LOCATION + V[hex_chars[1]] * FONT_CHAR_SIZE;
+    else if (hex_chars[2] == 0x3 && hex_chars[3] == 0x3) { // FX33 
+        RAM[I] = V[hex_chars[1]] / 100;
+        RAM[I + 1] = (V[hex_chars[1]] / 10) % 10;
+        RAM[I + 2] = (V[hex_chars[1]]) % 10;
+    }
+    else if (hex_chars[2] == 0x5 && hex_chars[3] == 0x5) { // FX55
+        for (unsigned i = 0x0; i <= hex_chars[1]; ++i)
+            RAM[I + i] = V[i];
+    }
+    else if (hex_chars[2] == 0x6 && hex_chars[3] == 0x5) { // FX65
+        for (unsigned i = 0x0; i <= hex_chars[1]; ++i)
+            V[i] = RAM[I + i];
+    }
 }
 
 int Emulator::get_address_from_binary(const unsigned char hex_chars[4]) {

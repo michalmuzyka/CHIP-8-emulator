@@ -1,5 +1,8 @@
 #pragma once
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RenderTexture.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include "Logger.hpp"
 #include "Keyboard.hpp"
 
@@ -23,9 +26,21 @@ protected:
 
 class GameWindow :public Window
 {
-public:
-    GameWindow(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger);
+    sf::Sprite game_board;
+    sf::RenderTexture board_texture;
+    const sf::Vector2i display_pixel_size;
+    const sf::Color background_color{ sf::Color::Black };
 
+    sf::RectangleShape pixel;
+    const sf::Vector2i pixel_size;
+    const sf::Color pixel_color{ sf::Color::White };
+
+    std::vector<std::vector<bool>> pixels_drew;
+
+public:
+    GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger);
+
+    bool draw_pixel_row(sf::Vector2i at, const unsigned char& row);
     void clear();
 
     void display() override;
