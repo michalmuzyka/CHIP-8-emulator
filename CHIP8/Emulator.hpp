@@ -15,7 +15,7 @@ public:
     void execute_current_line();
     void update();
 
-//private:
+private:
     unsigned last_instruction_addr{ 0x200 };
 
     static const unsigned RAM_SIZE = 4096;
@@ -26,13 +26,12 @@ public:
     unsigned char delay_timer{ 0 };
     unsigned char sound_timer{ 0 };
     std::stack<int> stack;
-
-    std::mt19937 generator;
     bool PC_should_be_increment{ true };
 
     Logger* logger;
     GameWindow* window;
     Keyboard* keyboard;
+    std::mt19937 generator;
 
     void opcodes0(const unsigned char hex_chars[4]);
     void opcodes1(const unsigned char hex_chars[4]);
@@ -57,4 +56,5 @@ public:
 
     static int get_address_from_binary(const unsigned char hex_chars[4]);
     static unsigned char get_constant_from_binary(const unsigned char hex_chars[4]);
+    void unknown_opcode(const unsigned char hex_chars[4]);
 };

@@ -1,14 +1,10 @@
 #include "Window.hpp"
-
-
-#include <bitset>
-#include <iostream>
 #include <SFML/Window/Event.hpp>
 
 Window::Window(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* log)
     :logger{ log }
 {
-    window.create(sf::VideoMode{ window_width, window_height }, window_title);
+    window.create(sf::VideoMode{ window_width, window_height }, window_title, sf::Style::Close);
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(500);
 
@@ -24,6 +20,9 @@ void Window::handle_events() {
         if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased)
             if (keyboard) keyboard->handle_keyboard_events(event);
     }
+
+    if (keyboard->is_pressed(sf::Keyboard::Escape))
+        window.close();
 }
 
 bool Window::is_open() const {
@@ -56,7 +55,6 @@ void GameWindow::clear() {
 
 bool GameWindow::draw_pixels_row(sf::Vector2i at, const unsigned char &row) {
     unsigned char y = at.y % display_pixel_size.y;
-
     bool pixel_erased = false;
     unsigned char mask = 0b10000000;
     

@@ -2,6 +2,8 @@
 #include <fstream>
 #include <cstring>
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <chrono>
 
 Emulator::Emulator(Logger* logger, GameWindow* window, Keyboard* keyboard)
@@ -35,6 +37,9 @@ Emulator::Emulator(Logger* logger, GameWindow* window, Keyboard* keyboard)
 }
 
 bool Emulator::load_program_from_file(const std::string& path) {
+    PC = 0x200;
+    last_instruction_addr = 0x200;
+
     std::ifstream program_file(path, std::ios::in | std::ios::binary);
 
     if (!program_file.is_open()) {
@@ -92,6 +97,7 @@ void Emulator::execute_current_line() {
         case 0xD: opcodesD(hex_chars); break;
         case 0xE: opcodesE(hex_chars); break;
         case 0xF: opcodesF(hex_chars); break;
+        default: unknown_opcode(hex_chars);
     }
     PC_should_be_increment ? PC += 2 : PC_should_be_increment = true;
 }
@@ -103,7 +109,7 @@ void Emulator::opcodes0(const unsigned char hex_chars[4]) {
         if (stack.empty()) logger->log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
         PC = stack.top();
         stack.pop();
-    }
+    } else unknown_opcode(hex_chars);
 }
 
 void Emulator::opcodes1(const unsigned char hex_chars[4]) {
@@ -181,13 +187,15 @@ void Emulator::opcodes8(const unsigned char hex_chars[4]) {
         V[0xF] = V[hex_chars[1]] & 0b10000000;
         V[hex_chars[1]] <<= 1;
         break;
+    default: unknown_opcode(hex_chars);
     }
 }
 
 void Emulator::opcodes9(const unsigned char hex_chars[4]) {
-    if (hex_chars[3] == 0x0)  // 9XY0, skip if Vx != Vy
+    if (hex_chars[3] == 0x0) {  // 9XY0, skip if Vx != Vy
         if (V[hex_chars[1]] != V[hex_chars[2]])
             PC += 2;
+    } else unknown_opcode(hex_chars);
 }
 
 void Emulator::opcodesA(const unsigned char hex_chars[4]) {
@@ -225,6 +233,7 @@ void Emulator::opcodesE(const unsigned char hex_chars[4]) {
         if (!keyboard->CHIP8_key_is_pressed(V[hex_chars[1]]))
             PC += 2;
     }
+    else unknown_opcode(hex_chars);
 }
 
 void Emulator::opcodesF(const unsigned char hex_chars[4]) {
@@ -255,7 +264,9 @@ void Emulator::opcodesF(const unsigned char hex_chars[4]) {
         for (unsigned i = 0x0; i <= hex_chars[1]; ++i)
             V[i] = RAM[I + i];
         I += hex_chars[1];
+
     }
+    else unknown_opcode(hex_chars);
 }
 
 int Emulator::get_address_from_binary(const unsigned char hex_chars[4]) {
@@ -264,4 +275,12 @@ int Emulator::get_address_from_binary(const unsigned char hex_chars[4]) {
 
 unsigned char Emulator::get_constant_from_binary(const unsigned char hex_chars[4]) {
     return (hex_chars[2] << 4) + hex_chars[3];
+}
+
+void Emulator::unknown_opcode(const unsigned char hex_chars[4]) {
+    if (logger) {
+        std::stringstream ss;
+        ss << std::hex << (int)(hex_chars[0]) << (int)(hex_chars[1]) << (int)(hex_chars[2]) << (int)(hex_chars[3]);
+        logger->log(MESSAGE_TYPE::INFO, "Unknown opcode: " + ss.str());
+    }
 }
