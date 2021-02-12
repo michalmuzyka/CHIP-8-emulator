@@ -9,11 +9,12 @@
 class Emulator
 {
 public:
-    Emulator(Logger* logger, GameWindow* display, Keyboard* keyboard);
+    Emulator(Logger* logger, Keyboard* keyboard);
 
     bool load_program_from_file(const std::string& path);
     void execute_current_line();
     void update();
+    GameWindow window;
 
 private:
     unsigned last_instruction_addr{ 0x200 };
@@ -29,7 +30,6 @@ private:
     bool PC_should_be_increment{ true };
 
     Logger* logger;
-    GameWindow* window;
     Keyboard* keyboard;
     std::mt19937 generator;
 

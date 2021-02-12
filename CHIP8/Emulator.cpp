@@ -5,10 +5,11 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <SFML/graphics.hpp>
 
-Emulator::Emulator(Logger* logger, GameWindow* window, Keyboard* keyboard)
+Emulator::Emulator(Logger* logger, Keyboard* keyboard)
     :logger{ logger },
-    window{ window },
+    window{ "CHIP-8 emulator", sf::Vector2i{8,8}, sf::Vector2i{64,32}, logger },
     keyboard{ keyboard },
     generator{ std::chrono::high_resolution_clock::now().time_since_epoch().count() }
 {
@@ -32,8 +33,9 @@ Emulator::Emulator(Logger* logger, GameWindow* window, Keyboard* keyboard)
     };
 
     memcpy(RAM + FONT_LOCATION, font, FONT_CHAR_COUNT* FONT_CHAR_SIZE);
-
+    window.link_keyboard(keyboard);
     load_program_from_file("test_opcode.ch8");
+    window.open();
 }
 
 bool Emulator::load_program_from_file(const std::string& path) {
@@ -61,7 +63,7 @@ bool Emulator::load_program_from_file(const std::string& path) {
             return false;
         }
     }
-    
+ 
     return true;
 }
 
@@ -104,7 +106,7 @@ void Emulator::execute_current_line() {
 
 void Emulator::opcodes0(const unsigned char hex_chars[4]) {
     if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0x0) //00E0, clear display
-        window->clear();
+        window.clear();
     else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE) { //00EE, return from subroutine
         if (stack.empty()) logger->log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
         PC = stack.top();
@@ -219,7 +221,7 @@ void Emulator::opcodesD(const unsigned char hex_chars[4]) {
     // DXYN, display
     bool pixel_changed = false;
     for (unsigned char i = 0x0; i < hex_chars[3]; ++i)
-        pixel_changed |= window->draw_pixels_row(sf::Vector2i{ V[hex_chars[1]], V[hex_chars[2]]+i }, RAM[I + i]);
+        pixel_changed |= window.draw_pixels_row(sf::Vector2i{ V[hex_chars[1]], V[hex_chars[2]]+i }, RAM[I + i]);
 
     V[0xF] = pixel_changed ? 1 : 0;
 }

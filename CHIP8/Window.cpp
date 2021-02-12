@@ -1,8 +1,11 @@
 #include "Window.hpp"
 #include <SFML/Window/Event.hpp>
 
-Window::Window(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* log)
-    :logger{ log }
+Window::Window(Logger* log)
+    :logger{log} {   
+}
+
+void Window::open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height)
 {
     window.create(sf::VideoMode{ window_width, window_height }, window_title, sf::Style::Close);
     window.setKeyRepeatEnabled(false);
@@ -13,6 +16,8 @@ Window::Window(const std::string& window_title, const unsigned& window_width, co
 }
 
 void Window::handle_events() {
+    if(!is_open()) return;
+
     sf::Event event;
     while(window.pollEvent(event)){
         if (event.type == sf::Event::Closed)
@@ -21,7 +26,7 @@ void Window::handle_events() {
             if (keyboard) keyboard->handle_keyboard_events(event);
     }
 
-    if (keyboard->is_pressed(sf::Keyboard::Escape))
+    if (keyboard && keyboard->is_pressed(sf::Keyboard::Escape))
         window.close();
 }
 
@@ -34,7 +39,7 @@ void Window::link_keyboard(Keyboard *keyboard) {
 }
 
 GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size,  Logger* log)
-    :Window{ window_title, pixel_size.x * display_pixel_size.x, pixel_size.y * display_pixel_size.y, log },
+    :Window{ log },
      display_pixel_size{ display_pixel_size },
      pixel(sf::Vector2f{ pixel_size }),
      pixel_size{ pixel_size },
@@ -45,6 +50,10 @@ GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size,
     board_texture.setRepeated(false);
     game_board.setPosition(0, 0);
     board_texture.clear(background_color);
+}
+
+void GameWindow::open() {
+    Window::open("CHIP_8 emulator", pixel_size.x * display_pixel_size.x, pixel_size.y * display_pixel_size.y);
 }
 
 void GameWindow::clear() {
@@ -81,6 +90,8 @@ bool GameWindow::draw_pixels_row(sf::Vector2i at, const unsigned char &row) {
 }
 
 void GameWindow::display() {
+    if (!is_open()) return;
+
     window.clear(sf::Color::Black);
     board_texture.display();
     game_board.setTexture(board_texture.getTexture());

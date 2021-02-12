@@ -9,7 +9,8 @@
 class Window
 {
 public:
-    Window(const std::string& window_title, const unsigned& window_width, const unsigned& window_height, Logger* logger);
+    Window(Logger* log);
+    void open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height);
     virtual ~Window() = default;
 
     virtual void handle_events() final;
@@ -26,6 +27,15 @@ protected:
 
 class GameWindow :public Window
 {
+public:
+    GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger);
+
+    void open();
+    void clear();
+    bool draw_pixels_row(sf::Vector2i at, const unsigned char& row);
+    void display() override;
+
+private:
     sf::Sprite game_board;
     sf::RenderTexture board_texture;
     const sf::Vector2i display_pixel_size;
@@ -36,12 +46,12 @@ class GameWindow :public Window
     const sf::Color pixel_color{ sf::Color::White };
 
     std::vector<std::vector<unsigned char>> drawn_pixels;
+};
 
-public:
-    GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger);
+class DebuggerWindow :public Window
+{
 
-    void clear();
-    bool draw_pixels_row(sf::Vector2i at, const unsigned char& row);
 
-    void display() override;
+
+
 };
