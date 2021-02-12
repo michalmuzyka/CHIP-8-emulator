@@ -1,20 +1,13 @@
 #include <iostream>
-
-#include "Emulator.hpp"
+#include "Debugger.hpp"
 
 int main()
 {
     Logger logger("log_file");
     Keyboard keyboard;
     Emulator emulator(&logger, &keyboard);
-
-    while(emulator.window.is_open()){
-
-        emulator.window.handle_events();
-        emulator.window.display();
-
-        emulator.update();
-    }
+    Debugger debugger(&emulator);
+    debugger.start_emulation();
 
     return 0;
 }

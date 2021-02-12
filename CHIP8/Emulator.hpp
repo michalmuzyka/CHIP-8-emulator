@@ -6,6 +6,8 @@
 #include "Window.hpp"
 #include "Keyboard.hpp"
 
+class Debugger;
+
 class Emulator
 {
 public:
@@ -57,4 +59,6 @@ private:
     static int get_address_from_binary(const unsigned char hex_chars[4]);
     static unsigned char get_constant_from_binary(const unsigned char hex_chars[4]);
     void unknown_opcode(const unsigned char hex_chars[4]);
+
+    friend class Debugger;
 };

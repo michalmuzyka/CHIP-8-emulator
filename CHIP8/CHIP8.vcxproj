@@ -148,7 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Debbuger.cpp" />
+    <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Emulator.cpp" />
     <ClCompile Include="Keyboard.cpp" />
@@ -156,7 +156,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Debbuger.hpp" />
+    <ClInclude Include="Debugger.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Emulator.hpp" />
     <ClInclude Include="Keyboard.hpp" />
