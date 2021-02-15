@@ -13,5 +13,4 @@ void Debugger::start_emulation() {
 
         emulator->update();
     }
-
 }

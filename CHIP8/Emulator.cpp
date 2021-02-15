@@ -71,6 +71,8 @@ void Emulator::update() {
     delay_timer = delay_timer ? delay_timer - 1 : 0;
     sound_timer = sound_timer ? sound_timer - 1 : 0;
 
+    if (sound_timer) window.play_buzzer();
+
     if(PC < last_instruction_addr)
         execute_current_line();
 }
@@ -279,7 +281,7 @@ unsigned char Emulator::get_constant_from_binary(const unsigned char hex_chars[4
     return (hex_chars[2] << 4) + hex_chars[3];
 }
 
-void Emulator::unknown_opcode(const unsigned char hex_chars[4]) {
+void Emulator::unknown_opcode(const unsigned char hex_chars[4]) const {
     if (logger) {
         std::stringstream ss;
         ss << std::hex << (int)(hex_chars[0]) << (int)(hex_chars[1]) << (int)(hex_chars[2]) << (int)(hex_chars[3]);

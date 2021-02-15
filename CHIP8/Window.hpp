@@ -3,6 +3,8 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
+#include <SFML/Audio/Sound.hpp>
 #include "Logger.hpp"
 #include "Keyboard.hpp"
 
@@ -34,8 +36,12 @@ public:
     void clear();
     bool draw_pixels_row(sf::Vector2i at, const unsigned char& row);
     void display() override;
+    void play_buzzer();
 
 private:
+    sf::SoundBuffer buzz_buffer;
+    sf::Sound buzz_sound;
+
     sf::Sprite game_board;
     sf::RenderTexture board_texture;
     const sf::Vector2i display_pixel_size;
@@ -51,8 +57,8 @@ private:
 class DebuggerWindow :public Window
 {
 public:
-    DebuggerWindow();
-    void display() override;
+   // DebuggerWindow();
+   // void display() override;
 
 private:
 

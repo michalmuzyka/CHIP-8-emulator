@@ -50,6 +50,11 @@ GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size,
     board_texture.setRepeated(false);
     game_board.setPosition(0, 0);
     board_texture.clear(background_color);
+
+    if (!buzz_buffer.loadFromFile("buzz.wav"))
+        logger->log(MESSAGE_TYPE::ERROR, "CAN'T LOAD BUZZER SOUND");
+    buzz_sound.setBuffer(buzz_buffer);
+    buzz_sound.setLoop(false);
 }
 
 void GameWindow::open() {
@@ -88,6 +93,11 @@ bool GameWindow::draw_pixels_row(sf::Vector2i at, const unsigned char &row) {
 
     return pixel_erased;
 }
+
+void GameWindow::play_buzzer() {
+    buzz_sound.play();
+}
+
 
 void GameWindow::display() {
     if (!is_open()) return;
