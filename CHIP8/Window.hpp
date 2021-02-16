@@ -57,8 +57,8 @@ private:
 class DebuggerWindow :public Window
 {
 public:
-   // DebuggerWindow();
-   // void display() override;
+   DebuggerWindow();
+   void display() override;
 
 private:
 

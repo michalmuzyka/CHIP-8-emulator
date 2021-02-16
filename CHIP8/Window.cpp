@@ -98,7 +98,6 @@ void GameWindow::play_buzzer() {
     buzz_sound.play();
 }
 
-
 void GameWindow::display() {
     if (!is_open()) return;
 
@@ -108,3 +107,13 @@ void GameWindow::display() {
     window.draw(game_board);
     window.display();
 }
+
+
+DebuggerWindow::DebuggerWindow() {
+    
+}
+
+void DebuggerWindow::display() {
+    
+}
+
