@@ -5,10 +5,10 @@
 #include <string>
 #include <sstream>
 #include <chrono>
-#include <SFML/graphics.hpp>
 
-Emulator::Emulator(Logger* logger, Keyboard* keyboard)
+Emulator::Emulator(Logger* logger, Settings* settings, Keyboard* keyboard)
     :logger{ logger },
+    settings{ settings },
     window{ "CHIP-8 emulator", sf::Vector2i{8,8}, sf::Vector2i{64,32}, logger },
     keyboard{ keyboard },
     generator{ std::chrono::high_resolution_clock::now().time_since_epoch().count() }
@@ -34,8 +34,6 @@ Emulator::Emulator(Logger* logger, Keyboard* keyboard)
 
     memcpy(RAM + FONT_LOCATION, font, FONT_CHAR_COUNT* FONT_CHAR_SIZE);
     window.link_keyboard(keyboard);
-    load_program_from_file("test_opcode.ch8");
-    window.open();
 }
 
 bool Emulator::load_program_from_file(const std::string& path) {

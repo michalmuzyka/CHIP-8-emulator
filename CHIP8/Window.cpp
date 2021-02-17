@@ -108,7 +108,7 @@ void GameWindow::display() {
     window.display();
 }
 
-
+/*
 DebuggerWindow::DebuggerWindow() {
     
 }
@@ -117,3 +117,4 @@ void DebuggerWindow::display() {
     
 }
 
+*/

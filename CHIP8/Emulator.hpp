@@ -2,7 +2,7 @@
 #include <stack>
 #include <string>
 #include <random>
-#include "Logger.hpp"
+#include "Settings.hpp"
 #include "Window.hpp"
 #include "Keyboard.hpp"
 
@@ -11,7 +11,7 @@ class Debugger;
 class Emulator
 {
 public:
-    Emulator(Logger* logger, Keyboard* keyboard);
+    Emulator(Logger* logger, Settings* settings, Keyboard* keyboard);
 
     bool load_program_from_file(const std::string& path);
     void execute_current_line();
@@ -31,6 +31,7 @@ private:
     std::stack<int> stack;
     bool PC_should_be_increment{ true };
 
+    Settings* settings;
     Logger* logger;
     Keyboard* keyboard;
     std::mt19937 generator;

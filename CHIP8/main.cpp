@@ -4,10 +4,11 @@
 int main()
 {
     Logger logger("log_file");
+    Settings settings("config.ini", &logger);
     Keyboard keyboard;
-    Emulator emulator(&logger, &keyboard);
+    Emulator emulator(&logger, &settings, &keyboard);
     Debugger debugger(&emulator);
-    debugger.start_emulation();
+   // debugger.start_emulation();
 
     return 0;
 }
