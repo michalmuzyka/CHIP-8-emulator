@@ -8,7 +8,7 @@ int main()
     Keyboard keyboard;
     Emulator emulator(&logger, &settings, &keyboard);
     Debugger debugger(&emulator);
-   // debugger.start_emulation();
+    debugger.start_emulation();
 
     return 0;
 }

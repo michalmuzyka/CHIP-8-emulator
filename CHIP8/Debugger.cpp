@@ -6,12 +6,11 @@ Debugger::Debugger(Emulator* emulator)
 {
     roms_path = (*settings)["rom_dir"];
     scan_roms(roms_path);
-
-    for (auto& p : roms)
-        std::cout << p.string() << '\n';
 }
 
 void Debugger::start_emulation() {
+    emulator->load_program_from_file(roms[2].string());
+    emulator->window.open();
     while (emulator->window.is_open()) {
         emulator->window.handle_events();
         emulator->window.display();

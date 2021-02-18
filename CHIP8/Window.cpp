@@ -1,8 +1,8 @@
 #include "Window.hpp"
 #include <SFML/Window/Event.hpp>
 
-Window::Window(Logger* log)
-    :logger{log} {   
+Window::Window(Logger* log, Settings* settings)
+    :logger{ log }, settings{ settings } {
 }
 
 void Window::open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height)
@@ -38,13 +38,16 @@ void Window::link_keyboard(Keyboard *keyboard) {
     this->keyboard = keyboard;
 }
 
-GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size,  Logger* log)
-    :Window{ log },
+GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size,  Logger* log, Settings* settings)
+    :Window{ log, settings },
      display_pixel_size{ display_pixel_size },
      pixel(sf::Vector2f{ pixel_size }),
      pixel_size{ pixel_size },
      drawn_pixels( display_pixel_size.y, std::vector<unsigned char>(display_pixel_size.x, 0))
 {
+    pixel_color = settings->get_color("pixel_color");
+    background_color = settings->get_color("background_color");
+
     board_texture.create(pixel_size.x * display_pixel_size.x, pixel_size.y * display_pixel_size.y);
     board_texture.setSmooth(false);
     board_texture.setRepeated(false);

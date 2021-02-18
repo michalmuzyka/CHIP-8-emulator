@@ -7,11 +7,12 @@
 #include <SFML/Audio/Sound.hpp>
 #include "Logger.hpp"
 #include "Keyboard.hpp"
+#include "Settings.hpp"
 
 class Window
 {
 public:
-    Window(Logger* log);
+    Window(Logger* log, Settings* settings);
     void open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height);
     virtual ~Window() = default;
 
@@ -23,6 +24,7 @@ public:
 protected:
     sf::RenderWindow window;
 
+    Settings* settings;
     Keyboard* keyboard = nullptr;
     Logger* logger;
 };
@@ -30,7 +32,7 @@ protected:
 class GameWindow :public Window
 {
 public:
-    GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger);
+    GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger, Settings* settings);
 
     void open();
     void clear();
@@ -45,11 +47,11 @@ private:
     sf::Sprite game_board;
     sf::RenderTexture board_texture;
     const sf::Vector2i display_pixel_size;
-    const sf::Color background_color{ sf::Color::Black };
+    sf::Color background_color;
 
     sf::RectangleShape pixel;
     const sf::Vector2i pixel_size;
-    const sf::Color pixel_color{ sf::Color::White };
+    sf::Color pixel_color;
 
     std::vector<std::vector<unsigned char>> drawn_pixels;
 };

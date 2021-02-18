@@ -9,13 +9,6 @@ Settings::Settings(const std::string& path, Logger* logger)
     parse_config_file(path);
 }
 
-std::string Settings::operator[](const std::string& string) {
-    if (settings.find(string) == settings.end())
-        return "no";
-
-    return settings[string];
-}
-
 void Settings::parse_config_file(const std::string& path) {
     namespace fs = std::filesystem;
     if (!fs::exists(path))
@@ -29,7 +22,7 @@ void Settings::parse_config_file(const std::string& path) {
         logger->log(MESSAGE_TYPE::ERROR, path + " cannot be opened");
 
     std::string line;
-    while(std::getline(config_file, line)){
+    while (std::getline(config_file, line)) {
         if (line[0] == '#') continue; // comment
 
         auto equation_pos = line.find('=');
@@ -41,5 +34,23 @@ void Settings::parse_config_file(const std::string& path) {
             settings.insert({ key, value });
         }
     }
+}
 
+std::string Settings::operator[](const std::string& string) {
+    if (settings.find(string) == settings.end())
+        return "no";
+
+    return settings[string];
+}
+
+sf::Color Settings::get_color(const std::string& string) {
+    std::string color = (*this)[string];
+    if (color == "no")
+        return sf::Color::White;
+
+    sf::Uint8 r = std::stoi(color.substr(0, 2), nullptr, 16);
+    sf::Uint8 g = std::stoi(color.substr(2, 2), nullptr, 16);
+    sf::Uint8 b = std::stoi(color.substr(4, 2), nullptr, 16);
+
+    return sf::Color{ r,g,b,255 };
 }

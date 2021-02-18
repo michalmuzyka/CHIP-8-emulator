@@ -9,7 +9,7 @@
 Emulator::Emulator(Logger* logger, Settings* settings, Keyboard* keyboard)
     :logger{ logger },
     settings{ settings },
-    window{ "CHIP-8 emulator", sf::Vector2i{8,8}, sf::Vector2i{64,32}, logger },
+    window{ "CHIP-8 emulator", sf::Vector2i{8,8}, sf::Vector2i{64,32}, logger, settings },
     keyboard{ keyboard },
     generator{ std::chrono::high_resolution_clock::now().time_since_epoch().count() }
 {
