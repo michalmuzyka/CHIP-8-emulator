@@ -1,7 +1,6 @@
 #include "Settings.hpp"
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 
 Settings::Settings(const std::string& path, Logger* logger)
     :logger(logger)

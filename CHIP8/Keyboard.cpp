@@ -9,6 +9,7 @@ bool Keyboard::is_pressed(sf::Keyboard::Key symbol) {
 }
 
 bool Keyboard::CHIP8_key_is_pressed(int symbol) {
+
     /*
      * KEYBOARD BINDING:
      * chip8:    keyboard:

@@ -1,8 +1,10 @@
 #include "Window.hpp"
 #include <SFML/Window/Event.hpp>
 
+//WINDOW
+
 Window::Window(Logger* log, Settings* settings)
-    :logger{ log }, settings{ settings } {
+    :settings{ settings }, logger{ log } {
 }
 
 void Window::open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height)
@@ -34,9 +36,11 @@ bool Window::is_open() const {
     return window.isOpen();
 }
 
-void Window::link_keyboard(Keyboard *keyboard) {
+void Window::link_keyboard(Keyboard* keyboard) {
     this->keyboard = keyboard;
 }
+
+//GAMEWINDOW
 
 GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size,  Logger* log, Settings* settings)
     :Window{ log, settings },
@@ -111,13 +115,19 @@ void GameWindow::display() {
     window.display();
 }
 
-/*
-DebuggerWindow::DebuggerWindow() {
+//DEBUGER WINDOW
+
+DebuggerWindow::DebuggerWindow(Logger* log, Settings* settings)
+    :Window(log, settings)
+{
+    font.loadFromFile("Inconsolata-ExtraLight.ttf");
+}
+
+void DebuggerWindow::open() {
     
 }
 
 void DebuggerWindow::display() {
-    
-}
 
-*/
+    window.display();
+}

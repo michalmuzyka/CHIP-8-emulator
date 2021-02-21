@@ -3,6 +3,8 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include "Logger.hpp"
@@ -59,9 +61,12 @@ private:
 class DebuggerWindow :public Window
 {
 public:
-   DebuggerWindow();
+   DebuggerWindow(Logger *log, Settings* settings);
    void display() override;
+   void open();
 
 private:
+    sf::Font font;
+    sf::Text text;
 
 };

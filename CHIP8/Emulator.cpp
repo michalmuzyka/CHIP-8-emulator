@@ -7,9 +7,9 @@
 #include <chrono>
 
 Emulator::Emulator(Logger* logger, Settings* settings, Keyboard* keyboard)
-    :logger{ logger },
+    :window{ "CHIP-8 emulator", sf::Vector2i{8,8}, sf::Vector2i{64,32}, logger, settings },
     settings{ settings },
-    window{ "CHIP-8 emulator", sf::Vector2i{8,8}, sf::Vector2i{64,32}, logger, settings },
+    logger{ logger },
     keyboard{ keyboard },
     generator{ std::chrono::high_resolution_clock::now().time_since_epoch().count() }
 {
