@@ -19,5 +19,5 @@ private:
     Keyboard* keyboard;
     Logger* logger;
     Settings* settings;
-   // DebuggerWindow window;
+    DebuggerWindow window;
 };

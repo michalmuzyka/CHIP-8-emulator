@@ -12,7 +12,8 @@ public:
     std::string operator[](const std::string& string);
 
     sf::Color get_color(const std::string& string);
-
+    int get_int(const std::string& string);
+    float get_float(const std::string& string);
 private:
     std::map<std::string, std::string> settings;
 

@@ -7,7 +7,7 @@
 #include <chrono>
 
 Emulator::Emulator(Logger* logger, Settings* settings, Keyboard* keyboard)
-    :window{ "CHIP-8 emulator", sf::Vector2i{8,8}, sf::Vector2i{64,32}, logger, settings },
+    :window{ "CHIP-8 emulator", sf::Vector2i{64,32}, logger, settings },
     settings{ settings },
     logger{ logger },
     keyboard{ keyboard },
@@ -66,14 +66,25 @@ bool Emulator::load_program_from_file(const std::string& path) {
 }
 
 void Emulator::update() {
-    delay_timer = delay_timer ? delay_timer - 1 : 0;
-    sound_timer = sound_timer ? sound_timer - 1 : 0;
+    if (emulate) {
+        delay_timer = delay_timer ? delay_timer - 1 : 0;
+        sound_timer = sound_timer ? sound_timer - 1 : 0;
 
-    if (sound_timer) window.play_buzzer();
+        if (sound_timer) window.play_buzzer();
 
-    if(PC < last_instruction_addr)
-        execute_current_line();
+        if (PC < last_instruction_addr)
+            execute_current_line();
+    }
 }
+
+void Emulator::start_emulation() {
+    emulate = true;
+}
+
+void Emulator::stop_emulation() {
+    emulate = false;
+}
+
 
 void Emulator::execute_current_line() {
     unsigned char hex_chars[4];

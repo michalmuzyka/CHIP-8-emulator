@@ -14,6 +14,8 @@ public:
     Emulator(Logger* logger, Settings* settings, Keyboard* keyboard);
 
     bool load_program_from_file(const std::string& path);
+    void start_emulation();
+    void stop_emulation();
     void execute_current_line();
     void update();
     GameWindow window;
@@ -30,6 +32,7 @@ private:
     unsigned char sound_timer{ 0 };
     std::stack<int> stack;
     bool PC_should_be_increment{ true };
+    bool emulate = false;
 
     Settings* settings;
     Logger* logger;

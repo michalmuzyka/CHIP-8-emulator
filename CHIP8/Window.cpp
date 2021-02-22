@@ -42,13 +42,15 @@ void Window::link_keyboard(Keyboard* keyboard) {
 
 //GAMEWINDOW
 
-GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size,  Logger* log, Settings* settings)
+GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size,  Logger* log, Settings* settings)
     :Window{ log, settings },
      display_pixel_size{ display_pixel_size },
-     pixel(sf::Vector2f{ pixel_size }),
-     pixel_size{ pixel_size },
      drawn_pixels( display_pixel_size.y, std::vector<unsigned char>(display_pixel_size.x, 0))
 {
+    const int p_size = settings->get_int("pixel_size");
+    pixel_size = sf::Vector2i{ p_size, p_size };
+    pixel.setSize(sf::Vector2f( p_size, p_size ));
+
     pixel_color = settings->get_color("pixel_color");
     background_color = settings->get_color("background_color");
 
@@ -62,10 +64,18 @@ GameWindow::GameWindow(const std::string& window_title, sf::Vector2i pixel_size,
         logger->log(MESSAGE_TYPE::ERROR, "CAN'T LOAD BUZZER SOUND");
     buzz_sound.setBuffer(buzz_buffer);
     buzz_sound.setLoop(false);
+
+    buzz_sound.setVolume(settings->get_float("volume"));
 }
 
 void GameWindow::open() {
-    Window::open("CHIP_8 emulator", pixel_size.x * display_pixel_size.x, pixel_size.y * display_pixel_size.y);
+    const int width = pixel_size.x * display_pixel_size.x;
+    const int height = pixel_size.y * display_pixel_size.y;
+
+    Window::open("CHIP_8 emulator", width, height);
+
+    const auto current_pos = window.getPosition();
+    window.setPosition(sf::Vector2i{current_pos.x + width/2, current_pos.y});
 }
 
 void GameWindow::clear() {
@@ -102,7 +112,8 @@ bool GameWindow::draw_pixels_row(sf::Vector2i at, const unsigned char &row) {
 }
 
 void GameWindow::play_buzzer() {
-    buzz_sound.play();
+    if((*settings).get_int("play_sound_effect"))
+        buzz_sound.play();
 }
 
 void GameWindow::display() {
@@ -115,19 +126,28 @@ void GameWindow::display() {
     window.display();
 }
 
-//DEBUGER WINDOW
+//DEBUGGER WINDOW
 
 DebuggerWindow::DebuggerWindow(Logger* log, Settings* settings)
     :Window(log, settings)
 {
     font.loadFromFile("Inconsolata-ExtraLight.ttf");
+    text.setFont(font);
 }
 
 void DebuggerWindow::open() {
-    
+    const int height = settings->get_int("debug_window_height");
+    const int width = settings->get_int("debug_window_width");
+
+    Window::open("Debugger", width, height);
+    const auto current_pos = window.getPosition();
+    window.setPosition(sf::Vector2i{current_pos.x - width/2, current_pos.y});
+}
+
+void DebuggerWindow::draw_text(const std::string& text, sf::Vector2f at, bool with_outline) {
+
 }
 
 void DebuggerWindow::display() {
-
     window.display();
 }

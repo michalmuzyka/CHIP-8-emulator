@@ -34,7 +34,7 @@ protected:
 class GameWindow :public Window
 {
 public:
-    GameWindow(const std::string& window_title, sf::Vector2i pixel_size, sf::Vector2i display_pixel_size, Logger* logger, Settings* settings);
+    GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size, Logger* logger, Settings* settings);
 
     void open();
     void clear();
@@ -52,7 +52,7 @@ private:
     sf::Color background_color;
 
     sf::RectangleShape pixel;
-    const sf::Vector2i pixel_size;
+    sf::Vector2i pixel_size;
     sf::Color pixel_color;
 
     std::vector<std::vector<unsigned char>> drawn_pixels;
@@ -63,10 +63,10 @@ class DebuggerWindow :public Window
 public:
    DebuggerWindow(Logger *log, Settings* settings);
    void display() override;
+   void draw_text(const std::string &text, sf::Vector2f at, bool with_outline = false);
    void open();
 
 private:
     sf::Font font;
     sf::Text text;
-
 };

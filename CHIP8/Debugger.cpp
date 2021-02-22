@@ -1,21 +1,31 @@
 #include "Debugger.hpp"
-#include <iostream>
 
 Debugger::Debugger(Emulator* emulator)
-    :emulator{emulator}, keyboard{emulator->keyboard}, logger{emulator->logger}, settings{emulator->settings}
+    :emulator{ emulator },
+    keyboard{ emulator->keyboard },
+    logger{ emulator->logger },
+    settings{ emulator->settings },
+    window{ logger, settings }
 {
     roms_path = (*settings)["rom_dir"];
     scan_roms(roms_path);
+    window.open();
 }
 
 void Debugger::start_emulation() {
     emulator->load_program_from_file(roms[2].string());
     emulator->window.open();
-    while (emulator->window.is_open()) {
+    emulator->start_emulation();
+    while (emulator->window.is_open() || window.is_open()) {
+        if (!emulator->window.is_open())
+            emulator->stop_emulation();
+
         emulator->window.handle_events();
         emulator->window.display();
-
         emulator->update();
+
+        window.handle_events();
+        window.display();
     }
 }
 

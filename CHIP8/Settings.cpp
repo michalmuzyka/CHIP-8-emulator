@@ -25,7 +25,7 @@ void Settings::parse_config_file(const std::string& path) {
         if (line[0] == '#') continue; // comment
 
         auto equation_pos = line.find('=');
-        if (equation_pos == std::string::npos || equation_pos == line.length())
+        if (equation_pos == std::string::npos || equation_pos == line.length()-1)
             settings.insert({ line, "yes" });
         else {
             std::string key = line.substr(0, equation_pos);
@@ -52,4 +52,20 @@ sf::Color Settings::get_color(const std::string& string) {
     sf::Uint8 b = std::stoi(color.substr(4, 2), nullptr, 16);
 
     return sf::Color{ r,g,b,255 };
+}
+
+int Settings::get_int(const std::string& string) {
+    std::string number = (*this)[string];
+    if (number == "no")
+        return 0;
+
+    return std::stoi(number);
+}
+
+float Settings::get_float(const std::string& string) {
+    std::string number = (*this)[string];
+    if (number == "no")
+        return 0;
+
+    return std::stof(number);
 }
