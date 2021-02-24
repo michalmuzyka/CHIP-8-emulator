@@ -13,6 +13,8 @@ Debugger::Debugger(Emulator* emulator)
 }
 
 void Debugger::start_emulation() {
+    auto background_color = settings->get_color("debugger_background_color");
+
     emulator->load_program_from_file(roms[2].string());
     emulator->window.open();
     emulator->start_emulation();
@@ -24,8 +26,11 @@ void Debugger::start_emulation() {
         emulator->window.display();
         emulator->update();
 
+        window.clear(background_color);
         window.handle_events();
+        draw_roms_list();
         window.display();
+        update();
     }
 }
 
@@ -40,4 +45,14 @@ void Debugger::scan_roms(const std::string &directory_path) {
         if(path.is_regular_file())
             roms.push_back(path.path());
     }
+}
+
+void Debugger::draw_roms_list() {
+    window.draw_text("Choose game:", sf::Vector2i{0,0}, false);
+    for (int i = 0; i < roms.size(); ++i)
+        window.draw_text(roms[i].stem().string(), sf::Vector2i{ 1, i + 1 }, i == selected_rom);
+}
+
+void Debugger::update() {
+    
 }

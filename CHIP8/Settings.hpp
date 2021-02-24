@@ -16,9 +16,7 @@ public:
     float get_float(const std::string& string);
 private:
     std::map<std::string, std::string> settings;
+    Logger* logger;
 
     void parse_config_file(const std::string& path);
-
-    Logger* logger;
 };
-

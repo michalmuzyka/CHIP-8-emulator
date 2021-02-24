@@ -18,6 +18,7 @@ public:
     void open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height);
     virtual ~Window() = default;
 
+    void clear(sf::Color color);
     virtual void handle_events() final;
     virtual void display() = 0;
     virtual bool is_open() const final;
@@ -63,7 +64,7 @@ class DebuggerWindow :public Window
 public:
    DebuggerWindow(Logger *log, Settings* settings);
    void display() override;
-   void draw_text(const std::string &text, sf::Vector2f at, bool with_outline = false);
+   void draw_text(const std::string &text, sf::Vector2i at, bool with_outline = false);
    void open();
 
 private:

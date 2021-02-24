@@ -32,6 +32,11 @@ void Window::handle_events() {
         window.close();
 }
 
+void Window::clear(sf::Color color) {
+    window.clear(color);
+}
+
+
 bool Window::is_open() const {
     return window.isOpen();
 }
@@ -131,7 +136,11 @@ void GameWindow::display() {
 DebuggerWindow::DebuggerWindow(Logger* log, Settings* settings)
     :Window(log, settings)
 {
-    font.loadFromFile("Inconsolata-ExtraLight.ttf");
+    auto font_name = (*settings)["font"];
+
+    if (!font.loadFromFile(font_name))
+        log->log(MESSAGE_TYPE::ERROR, "Cannot load font from file");
+
     text.setFont(font);
 }
 
@@ -144,8 +153,21 @@ void DebuggerWindow::open() {
     window.setPosition(sf::Vector2i{current_pos.x - width/2, current_pos.y});
 }
 
-void DebuggerWindow::draw_text(const std::string& text, sf::Vector2f at, bool with_outline) {
+void DebuggerWindow::draw_text(const std::string& text_to_draw, sf::Vector2i at, bool with_outline) {
+    unsigned char_size = settings->get_int("char_size");
+    auto text_color = settings->get_color("debugger_text_color");
 
+    text.setFillColor(text_color);
+    text.setCharacterSize(char_size);
+    text.setString(text_to_draw);
+    text.setPosition(char_size * at.x, char_size * at.y);
+
+    if (with_outline) {
+        auto outline_color = settings->get_color("chosen_color");
+        text.setFillColor(sf::Color::White);
+    }
+
+    window.draw(text);
 }
 
 void DebuggerWindow::display() {
