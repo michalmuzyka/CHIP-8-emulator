@@ -11,7 +11,7 @@ class Debugger;
 class Emulator
 {
 public:
-    Emulator(Logger* logger, Settings* settings, Keyboard* keyboard);
+    Emulator(Settings* settings, Keyboard* keyboard);
 
     bool load_program_from_file(const std::string& path);
     void start_emulation();
@@ -35,7 +35,6 @@ private:
     bool emulate = false;
 
     Settings* settings;
-    Logger* logger;
     Keyboard* keyboard;
     std::mt19937 generator;
 

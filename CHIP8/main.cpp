@@ -3,10 +3,9 @@
 
 int main()
 {
-    Logger logger("log_file");
-    Settings settings("config.ini", &logger);
+    Settings settings("config.ini");
     Keyboard keyboard;
-    Emulator emulator(&logger, &settings, &keyboard);
+    Emulator emulator(&settings, &keyboard);
     Debugger debugger(&emulator);
     debugger.start_emulation();
 

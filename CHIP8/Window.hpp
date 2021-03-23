@@ -14,7 +14,7 @@
 class Window
 {
 public:
-    Window(Logger* log, Settings* settings);
+    Window(Settings* settings);
     void open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height);
     virtual ~Window() = default;
 
@@ -29,13 +29,12 @@ protected:
 
     Settings* settings;
     Keyboard* keyboard = nullptr;
-    Logger* logger;
 };
 
 class GameWindow :public Window
 {
 public:
-    GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size, Logger* logger, Settings* settings);
+    GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size, Settings* settings);
 
     void open();
     void clear();
@@ -62,7 +61,7 @@ private:
 class DebuggerWindow :public Window
 {
 public:
-   DebuggerWindow(Logger *log, Settings* settings);
+   DebuggerWindow(Settings* settings);
    void display() override;
    void draw_text(const std::string &text, sf::Vector2i at, bool with_outline = false);
    void open();

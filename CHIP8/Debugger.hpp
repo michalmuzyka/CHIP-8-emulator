@@ -21,7 +21,6 @@ private:
 
     Emulator* emulator;
     Keyboard* keyboard;
-    Logger* logger;
     Settings* settings;
     DebuggerWindow window;
 };

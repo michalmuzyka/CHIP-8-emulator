@@ -6,10 +6,9 @@
 #include <sstream>
 #include <chrono>
 
-Emulator::Emulator(Logger* logger, Settings* settings, Keyboard* keyboard)
-    :window{ "CHIP-8 emulator", sf::Vector2i{64,32}, logger, settings },
+Emulator::Emulator(Settings* settings, Keyboard* keyboard)
+    :window{ "CHIP-8 emulator", sf::Vector2i{64,32}, settings },
     settings{ settings },
-    logger{ logger },
     keyboard{ keyboard },
     generator{ std::chrono::high_resolution_clock::now().time_since_epoch().count() }
 {
@@ -43,8 +42,7 @@ bool Emulator::load_program_from_file(const std::string& path) {
     std::ifstream program_file(path, std::ios::in | std::ios::binary);
 
     if (!program_file.is_open()) {
-        if(logger) 
-            logger->log(MESSAGE_TYPE::ERROR, "Can't open program file");
+        log(MESSAGE_TYPE::ERROR, "Can't open program file");
         return false;
     }
 
@@ -56,8 +54,7 @@ bool Emulator::load_program_from_file(const std::string& path) {
         last_instruction_addr += 2;
         if (last_instruction_addr == RAM_SIZE) {
             last_instruction_addr = 0x200;
-            if (logger) 
-                logger->log(MESSAGE_TYPE::ERROR, "File is too big to load");
+            log(MESSAGE_TYPE::ERROR, "File is too big to load");
             return false;
         }
     }
@@ -119,7 +116,8 @@ void Emulator::opcodes0(const unsigned char hex_chars[4]) {
     if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0x0) //00E0, clear display
         window.clear();
     else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE) { //00EE, return from subroutine
-        if (stack.empty()) logger->log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
+        if (stack.empty())
+            log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
         PC = stack.top();
         stack.pop();
     } else unknown_opcode(hex_chars);
@@ -291,9 +289,7 @@ unsigned char Emulator::get_constant_from_binary(const unsigned char hex_chars[4
 }
 
 void Emulator::unknown_opcode(const unsigned char hex_chars[4]) const {
-    if (logger) {
-        std::stringstream ss;
-        ss << std::hex << (int)(hex_chars[0]) << (int)(hex_chars[1]) << (int)(hex_chars[2]) << (int)(hex_chars[3]);
-        logger->log(MESSAGE_TYPE::INFO, "Unknown opcode: " + ss.str());
-    }
+    std::stringstream ss;
+    ss << std::hex << (int)(hex_chars[0]) << (int)(hex_chars[1]) << (int)(hex_chars[2]) << (int)(hex_chars[3]);
+    log(MESSAGE_TYPE::INFO, "Unknown opcode: " + ss.str());
 }

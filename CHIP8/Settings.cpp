@@ -2,23 +2,21 @@
 #include <filesystem>
 #include <fstream>
 
-Settings::Settings(const std::string& path, Logger* logger)
-    :logger(logger)
-{
+Settings::Settings(const std::string& path){
     parse_config_file(path);
 }
 
 void Settings::parse_config_file(const std::string& path) {
     namespace fs = std::filesystem;
     if (!fs::exists(path))
-        logger->log(MESSAGE_TYPE::ERROR, path + " doesn't exist");
+        log(MESSAGE_TYPE::ERROR, path + " doesn't exist");
     if (!fs::is_regular_file(path))
-        logger->log(MESSAGE_TYPE::ERROR, path + " is not a file");
+        log(MESSAGE_TYPE::ERROR, path + " is not a file");
 
     std::ifstream config_file(path);
 
     if (!config_file.is_open())
-        logger->log(MESSAGE_TYPE::ERROR, path + " cannot be opened");
+        log(MESSAGE_TYPE::ERROR, path + " cannot be opened");
 
     std::string line;
     while (std::getline(config_file, line)) {

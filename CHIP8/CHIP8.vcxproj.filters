@@ -21,9 +21,6 @@
     <ClCompile Include="Emulator.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="Keyboard.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>

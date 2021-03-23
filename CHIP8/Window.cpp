@@ -3,8 +3,8 @@
 
 //WINDOW
 
-Window::Window(Logger* log, Settings* settings)
-    :settings{ settings }, logger{ log } {
+Window::Window(Settings* settings)
+    :settings{ settings }{
 }
 
 void Window::open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height)
@@ -13,8 +13,8 @@ void Window::open(const std::string& window_title, const unsigned& window_width,
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(500);
 
-    if (logger && !window.isOpen())
-        logger->log(MESSAGE_TYPE::ERROR, "Error, unable to open a window");
+    if (!window.isOpen())
+        log(MESSAGE_TYPE::ERROR, "Error, unable to open a window");
 }
 
 void Window::handle_events() {
@@ -47,8 +47,8 @@ void Window::link_keyboard(Keyboard* keyboard) {
 
 //GAMEWINDOW
 
-GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size,  Logger* log, Settings* settings)
-    :Window{ log, settings },
+GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size,  Settings* settings)
+    :Window{ settings },
      display_pixel_size{ display_pixel_size },
      drawn_pixels( display_pixel_size.y, std::vector<unsigned char>(display_pixel_size.x, 0))
 {
@@ -66,7 +66,7 @@ GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pix
     board_texture.clear(background_color);
 
     if (!buzz_buffer.loadFromFile("buzz.wav"))
-        logger->log(MESSAGE_TYPE::ERROR, "CAN'T LOAD BUZZER SOUND");
+        log(MESSAGE_TYPE::ERROR, "CAN'T LOAD BUZZER SOUND");
     buzz_sound.setBuffer(buzz_buffer);
     buzz_sound.setLoop(false);
 
@@ -133,13 +133,13 @@ void GameWindow::display() {
 
 //DEBUGGER WINDOW
 
-DebuggerWindow::DebuggerWindow(Logger* log, Settings* settings)
-    :Window(log, settings)
+DebuggerWindow::DebuggerWindow(Settings* settings)
+    :Window(settings)
 {
     auto font_name = (*settings)["font"];
 
     if (!font.loadFromFile(font_name))
-        log->log(MESSAGE_TYPE::ERROR, "Cannot load font from file");
+       log(MESSAGE_TYPE::ERROR, "Cannot load font from file");
 
     text.setFont(font);
 }
@@ -147,6 +147,8 @@ DebuggerWindow::DebuggerWindow(Logger* log, Settings* settings)
 void DebuggerWindow::open() {
     const int height = settings->get_int("debug_window_height");
     const int width = settings->get_int("debug_window_width");
+
+    window.setFramerateLimit(60);
 
     Window::open("Debugger", width, height);
     const auto current_pos = window.getPosition();
