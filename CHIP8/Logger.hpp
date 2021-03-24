@@ -14,8 +14,7 @@ enum class MESSAGE_TYPE
     ERROR
 };
 
-static std::string logfile_pathname = "log_file";
-static void log(MESSAGE_TYPE type, const std::string& message){
+static void log(MESSAGE_TYPE type, const std::string& message, std::string logfile_pathname = "log_file"){
     std::ostream* out_stream;
 
 #ifdef _DEBUG

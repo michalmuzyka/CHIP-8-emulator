@@ -2,23 +2,18 @@
 #include <stack>
 #include <string>
 #include <random>
-#include "Settings.hpp"
 #include "Window.hpp"
 #include "Keyboard.hpp"
 
-class Debugger;
-
-class Emulator
+class Emulation
 {
 public:
-    Emulator(Settings* settings, Keyboard* keyboard);
+    Emulation();
 
     bool load_program_from_file(const std::string& path);
-    void start_emulation();
+    void emulate();
     void stop_emulation();
-    void execute_current_line();
     void update();
-    GameWindow window;
 
 private:
     unsigned last_instruction_addr{ 0x200 };
@@ -31,13 +26,14 @@ private:
     unsigned char delay_timer{ 0 };
     unsigned char sound_timer{ 0 };
     std::stack<int> stack;
-    bool PC_should_be_increment{ true };
-    bool emulate = false;
+    bool PC_should_be_incremented{ true };
+    bool should_emulate;
 
-    Settings* settings;
-    Keyboard* keyboard;
     std::mt19937 generator;
+    GameWindow window;
+    Keyboard keyboard;
 
+    void execute_current_line();
     void opcodes0(const unsigned char hex_chars[4]);
     void opcodes1(const unsigned char hex_chars[4]);
     void opcodes2(const unsigned char hex_chars[4]);
@@ -62,6 +58,4 @@ private:
     static int get_address_from_binary(const unsigned char hex_chars[4]);
     static unsigned char get_constant_from_binary(const unsigned char hex_chars[4]);
     void unknown_opcode(const unsigned char hex_chars[4]) const;
-
-    friend class Debugger;
 };

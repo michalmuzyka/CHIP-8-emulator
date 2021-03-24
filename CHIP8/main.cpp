@@ -1,13 +1,17 @@
-#include <iostream>
-#include "Debugger.hpp"
+#include <future>
+
+#include "Emulation.hpp"
 
 int main()
 {
-    Settings settings("config.ini");
-    Keyboard keyboard;
-    Emulator emulator(&settings, &keyboard);
-    Debugger debugger(&emulator);
-    debugger.start_emulation();
+
+    auto f = std::async(std::launch::async, []() {
+        Emulation emulation;
+        emulation.load_program_from_file("ROMS/test_opcode.ch8");
+        emulation.emulate();
+    });
+
+    f.get();
 
     return 0;
 }

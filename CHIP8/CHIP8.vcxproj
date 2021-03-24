@@ -148,18 +148,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="Emulator.cpp" />
+    <ClCompile Include="Emulation.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Debugger.hpp" />
     <ClInclude Include="Settings.hpp" />
     <ClInclude Include="Window.hpp" />
-    <ClInclude Include="Emulator.hpp" />
+    <ClInclude Include="Emulation.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Logger.hpp" />
   </ItemGroup>

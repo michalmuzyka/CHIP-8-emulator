@@ -7,16 +7,14 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/Audio/Sound.hpp>
-#include "Logger.hpp"
 #include "Keyboard.hpp"
 #include "Settings.hpp"
 
 class Window
 {
 public:
-    Window(Settings* settings);
     void open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height);
-    virtual ~Window() = default;
+    virtual ~Window();
 
     void clear(sf::Color color);
     virtual void handle_events() final;
@@ -26,15 +24,13 @@ public:
 
 protected:
     sf::RenderWindow window;
-
-    Settings* settings;
     Keyboard* keyboard = nullptr;
 };
 
 class GameWindow :public Window
 {
 public:
-    GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size, Settings* settings);
+    GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size);
 
     void open();
     void clear();
@@ -56,17 +52,4 @@ private:
     sf::Color pixel_color;
 
     std::vector<std::vector<unsigned char>> drawn_pixels;
-};
-
-class DebuggerWindow :public Window
-{
-public:
-   DebuggerWindow(Settings* settings);
-   void display() override;
-   void draw_text(const std::string &text, sf::Vector2i at, bool with_outline = false);
-   void open();
-
-private:
-    sf::Font font;
-    sf::Text text;
 };

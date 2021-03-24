@@ -3,15 +3,11 @@
 
 //WINDOW
 
-Window::Window(Settings* settings)
-    :settings{ settings }{
-}
-
 void Window::open(const std::string& window_title, const unsigned& window_width, const unsigned& window_height)
 {
     window.create(sf::VideoMode{ window_width, window_height }, window_title, sf::Style::Close);
     window.setKeyRepeatEnabled(false);
-    window.setFramerateLimit(500);
+    window.setFramerateLimit(300);
 
     if (!window.isOpen())
         log(MESSAGE_TYPE::ERROR, "Error, unable to open a window");
@@ -36,6 +32,9 @@ void Window::clear(sf::Color color) {
     window.clear(color);
 }
 
+Window::~Window() {
+    window.close();
+}
 
 bool Window::is_open() const {
     return window.isOpen();
@@ -47,17 +46,16 @@ void Window::link_keyboard(Keyboard* keyboard) {
 
 //GAMEWINDOW
 
-GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size,  Settings* settings)
-    :Window{ settings },
-     display_pixel_size{ display_pixel_size },
+GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size)
+    :display_pixel_size{ display_pixel_size },
      drawn_pixels( display_pixel_size.y, std::vector<unsigned char>(display_pixel_size.x, 0))
 {
-    const int p_size = settings->get_int("pixel_size");
+    const int p_size = Settings::ins()->get_int("pixel_size");
     pixel_size = sf::Vector2i{ p_size, p_size };
     pixel.setSize(sf::Vector2f( p_size, p_size ));
 
-    pixel_color = settings->get_color("pixel_color");
-    background_color = settings->get_color("background_color");
+    pixel_color = Settings::ins()->get_color("pixel_color");
+    background_color = Settings::ins()->get_color("background_color");
 
     board_texture.create(pixel_size.x * display_pixel_size.x, pixel_size.y * display_pixel_size.y);
     board_texture.setSmooth(false);
@@ -67,10 +65,10 @@ GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pix
 
     if (!buzz_buffer.loadFromFile("buzz.wav"))
         log(MESSAGE_TYPE::ERROR, "CAN'T LOAD BUZZER SOUND");
+
     buzz_sound.setBuffer(buzz_buffer);
     buzz_sound.setLoop(false);
-
-    buzz_sound.setVolume(settings->get_float("volume"));
+    buzz_sound.setVolume(Settings::ins()->get_float("volume"));
 }
 
 void GameWindow::open() {
@@ -117,7 +115,7 @@ bool GameWindow::draw_pixels_row(sf::Vector2i at, const unsigned char &row) {
 }
 
 void GameWindow::play_buzzer() {
-    if((*settings).get_int("play_sound_effect"))
+    if(Settings::ins()->get_int("play_sound_effect"))
         buzz_sound.play();
 }
 
@@ -128,50 +126,5 @@ void GameWindow::display() {
     board_texture.display();
     game_board.setTexture(board_texture.getTexture());
     window.draw(game_board);
-    window.display();
-}
-
-//DEBUGGER WINDOW
-
-DebuggerWindow::DebuggerWindow(Settings* settings)
-    :Window(settings)
-{
-    auto font_name = (*settings)["font"];
-
-    if (!font.loadFromFile(font_name))
-       log(MESSAGE_TYPE::ERROR, "Cannot load font from file");
-
-    text.setFont(font);
-}
-
-void DebuggerWindow::open() {
-    const int height = settings->get_int("debug_window_height");
-    const int width = settings->get_int("debug_window_width");
-
-    window.setFramerateLimit(60);
-
-    Window::open("Debugger", width, height);
-    const auto current_pos = window.getPosition();
-    window.setPosition(sf::Vector2i{current_pos.x - width/2, current_pos.y});
-}
-
-void DebuggerWindow::draw_text(const std::string& text_to_draw, sf::Vector2i at, bool with_outline) {
-    unsigned char_size = settings->get_int("char_size");
-    auto text_color = settings->get_color("debugger_text_color");
-
-    text.setFillColor(text_color);
-    text.setCharacterSize(char_size);
-    text.setString(text_to_draw);
-    text.setPosition(char_size * at.x, char_size * at.y);
-
-    if (with_outline) {
-        auto outline_color = settings->get_color("chosen_color");
-        text.setFillColor(sf::Color::White);
-    }
-
-    window.draw(text);
-}
-
-void DebuggerWindow::display() {
     window.display();
 }

@@ -2,8 +2,22 @@
 #include <filesystem>
 #include <fstream>
 
+std::string Settings::settings_path = "config.ini";
+Settings* Settings::instance = nullptr;
+
+Settings* Settings::ins() {
+    if (instance) return instance;
+        instance = new Settings(settings_path);
+
+    return instance;
+}
+
 Settings::Settings(const std::string& path){
     parse_config_file(path);
+}
+
+Settings::~Settings() {
+    delete instance;
 }
 
 void Settings::parse_config_file(const std::string& path) {

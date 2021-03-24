@@ -1,15 +1,12 @@
-#include "Emulator.hpp"
+#include "Emulation.hpp"
 #include <fstream>
-#include <cstring>
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <future>
 
-Emulator::Emulator(Settings* settings, Keyboard* keyboard)
-    :window{ "CHIP-8 emulator", sf::Vector2i{64,32}, settings },
-    settings{ settings },
-    keyboard{ keyboard },
+Emulation::Emulation()
+    :window{ "CHIP-8 emulator", sf::Vector2i{64,32}},
     generator{ std::chrono::high_resolution_clock::now().time_since_epoch().count() }
 {
     unsigned char font[FONT_CHAR_COUNT*FONT_CHAR_SIZE] = {
@@ -31,11 +28,11 @@ Emulator::Emulator(Settings* settings, Keyboard* keyboard)
         0xF0, 0x80, 0xF0, 0x80, 0x80  //F
     };
 
-    memcpy(RAM + FONT_LOCATION, font, FONT_CHAR_COUNT* FONT_CHAR_SIZE);
-    window.link_keyboard(keyboard);
+    memcpy(RAM + FONT_LOCATION, font, FONT_CHAR_COUNT * FONT_CHAR_SIZE);
+    window.link_keyboard(&keyboard);
 }
 
-bool Emulator::load_program_from_file(const std::string& path) {
+bool Emulation::load_program_from_file(const std::string& path) {
     PC = 0x200;
     last_instruction_addr = 0x200;
 
@@ -62,28 +59,26 @@ bool Emulator::load_program_from_file(const std::string& path) {
     return true;
 }
 
-void Emulator::update() {
-    if (emulate) {
-        delay_timer = delay_timer ? delay_timer - 1 : 0;
-        sound_timer = sound_timer ? sound_timer - 1 : 0;
+void Emulation::update() {
+     delay_timer = delay_timer ? delay_timer - 1 : 0;
+     sound_timer = sound_timer ? sound_timer - 1 : 0;
+     if (sound_timer) window.play_buzzer();
+     if (PC < last_instruction_addr)
+        execute_current_line();
+}
 
-        if (sound_timer) window.play_buzzer();
+void Emulation::emulate() {
+    window.open();
+    should_emulate = true;
 
-        if (PC < last_instruction_addr)
-            execute_current_line();
+    while(should_emulate && window.is_open()){
+        window.handle_events();
+        update();
+        window.display();
     }
 }
 
-void Emulator::start_emulation() {
-    emulate = true;
-}
-
-void Emulator::stop_emulation() {
-    emulate = false;
-}
-
-
-void Emulator::execute_current_line() {
+void Emulation::execute_current_line() {
     unsigned char hex_chars[4];
     hex_chars[0] = (RAM[PC] & 0b11110000) >> 4;
     hex_chars[1] = RAM[PC] & 0b1111;
@@ -109,10 +104,10 @@ void Emulator::execute_current_line() {
         case 0xF: opcodesF(hex_chars); break;
         default: unknown_opcode(hex_chars);
     }
-    PC_should_be_increment ? PC += 2 : PC_should_be_increment = true;
+    PC_should_be_incremented ? PC += 2 : PC_should_be_incremented = true;
 }
 
-void Emulator::opcodes0(const unsigned char hex_chars[4]) {
+void Emulation::opcodes0(const unsigned char hex_chars[4]) {
     if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0x0) //00E0, clear display
         window.clear();
     else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE) { //00EE, return from subroutine
@@ -123,48 +118,48 @@ void Emulator::opcodes0(const unsigned char hex_chars[4]) {
     } else unknown_opcode(hex_chars);
 }
 
-void Emulator::opcodes1(const unsigned char hex_chars[4]) {
+void Emulation::opcodes1(const unsigned char hex_chars[4]) {
     //1NNN, jump to address
     PC = get_address_from_binary(hex_chars);
-    PC_should_be_increment = false;
+    PC_should_be_incremented = false;
 }
 
-void Emulator::opcodes2(const unsigned char hex_chars[4]) {
+void Emulation::opcodes2(const unsigned char hex_chars[4]) {
     // 2NNN, run subroutine
     stack.push(PC);
     PC = get_address_from_binary(hex_chars);
-    PC_should_be_increment = false;
+    PC_should_be_incremented = false;
 }
 
-void Emulator::opcodes3(const unsigned char hex_chars[4]) {
+void Emulation::opcodes3(const unsigned char hex_chars[4]) {
     // 3XNN, skip if Vx == NN  
     if (V[hex_chars[1]] == get_constant_from_binary(hex_chars))
         PC += 2;
 }
 
-void Emulator::opcodes4(const unsigned char hex_chars[4]) {
+void Emulation::opcodes4(const unsigned char hex_chars[4]) {
     // 4XNN, skip if Vx != NN 
     if (V[hex_chars[1]] != get_constant_from_binary(hex_chars))
         PC += 2;
 }
 
-void Emulator::opcodes5(const unsigned char hex_chars[4]) {
+void Emulation::opcodes5(const unsigned char hex_chars[4]) {
     // 5XY0, skip if Vx == Vy
     if (V[hex_chars[1]] == V[hex_chars[2]])
         PC += 2;
 }
 
-void Emulator::opcodes6(const unsigned char hex_chars[4]) {
+void Emulation::opcodes6(const unsigned char hex_chars[4]) {
     // 6XNN, Vx = NN
     V[hex_chars[1]] = get_constant_from_binary(hex_chars);
 }
 
-void Emulator::opcodes7(const unsigned char hex_chars[4]) {
+void Emulation::opcodes7(const unsigned char hex_chars[4]) {
     // 7XNN, Vx += NN
     V[hex_chars[1]] += get_constant_from_binary(hex_chars);
 }
 
-void Emulator::opcodes8(const unsigned char hex_chars[4]) {
+void Emulation::opcodes8(const unsigned char hex_chars[4]) {
     switch (hex_chars[3]) {
     case 0x0: // 8XY0, Vx = Vy
         V[hex_chars[1]] = V[hex_chars[2]];
@@ -202,31 +197,31 @@ void Emulator::opcodes8(const unsigned char hex_chars[4]) {
     }
 }
 
-void Emulator::opcodes9(const unsigned char hex_chars[4]) {
+void Emulation::opcodes9(const unsigned char hex_chars[4]) {
     if (hex_chars[3] == 0x0) {  // 9XY0, skip if Vx != Vy
         if (V[hex_chars[1]] != V[hex_chars[2]])
             PC += 2;
     } else unknown_opcode(hex_chars);
 }
 
-void Emulator::opcodesA(const unsigned char hex_chars[4]) {
+void Emulation::opcodesA(const unsigned char hex_chars[4]) {
     // ANNN, set I to address
     I = get_address_from_binary(hex_chars);
 }
 
-void Emulator::opcodesB(const unsigned char hex_chars[4]) {
+void Emulation::opcodesB(const unsigned char hex_chars[4]) {
     // BNNN, jump to address + V0
     PC = static_cast<int>(V[0]) + get_address_from_binary(hex_chars);
-    PC_should_be_increment = false;
+    PC_should_be_incremented = false;
 }
 
-void Emulator::opcodesC(const unsigned char hex_chars[4]) {
+void Emulation::opcodesC(const unsigned char hex_chars[4]) {
     // CNNN, Vx = rand()%NN
     const std::uniform_int_distribution<int> uniform_dist(0, static_cast<int>(get_constant_from_binary(hex_chars)));
     V[hex_chars[1]] = uniform_dist(generator);
 }
 
-void Emulator::opcodesD(const unsigned char hex_chars[4]) {
+void Emulation::opcodesD(const unsigned char hex_chars[4]) {
     // DXYN, display
     bool pixel_changed = false;
     for (unsigned char i = 0x0; i < hex_chars[3]; ++i)
@@ -235,23 +230,23 @@ void Emulator::opcodesD(const unsigned char hex_chars[4]) {
     V[0xF] = pixel_changed ? 1 : 0;
 }
 
-void Emulator::opcodesE(const unsigned char hex_chars[4]) {
+void Emulation::opcodesE(const unsigned char hex_chars[4]) {
     if (hex_chars[2] == 0x9 && hex_chars[3] == 0xE) { // EX9E, skip next if key from Vx is pressed
-        if (keyboard->CHIP8_key_is_pressed(V[hex_chars[1]]))
+        if (keyboard.CHIP8_key_is_pressed(V[hex_chars[1]]))
             PC += 2;
     }
     else if (hex_chars[2] == 0xA && hex_chars[3] == 0x1) { // EXA1, skip next if key from Vx isnt pressed
-        if (!keyboard->CHIP8_key_is_pressed(V[hex_chars[1]]))
+        if (!keyboard.CHIP8_key_is_pressed(V[hex_chars[1]]))
             PC += 2;
     }
     else unknown_opcode(hex_chars);
 }
 
-void Emulator::opcodesF(const unsigned char hex_chars[4]) {
+void Emulation::opcodesF(const unsigned char hex_chars[4]) {
     if (hex_chars[2] == 0x0 && hex_chars[3] == 0x7) // FX07, set Vx to delay timer
         V[hex_chars[1]] = delay_timer;
     else if (hex_chars[2] == 0x0 && hex_chars[3] == 0xA) {  // FX0A, block until key pressed
-        PC_should_be_increment = keyboard->is_any_pressed();
+        PC_should_be_incremented = keyboard.is_any_pressed();
     }
     else if (hex_chars[2] == 0x1 && hex_chars[3] == 0x5) // FX15, set delay timer to Vx
         delay_timer = V[hex_chars[1]];
@@ -280,16 +275,19 @@ void Emulator::opcodesF(const unsigned char hex_chars[4]) {
     else unknown_opcode(hex_chars);
 }
 
-int Emulator::get_address_from_binary(const unsigned char hex_chars[4]) {
+int Emulation::get_address_from_binary(const unsigned char hex_chars[4]) {
     return (hex_chars[1] << 8) + (hex_chars[2] << 4) + hex_chars[3];
 }
 
-unsigned char Emulator::get_constant_from_binary(const unsigned char hex_chars[4]) {
+unsigned char Emulation::get_constant_from_binary(const unsigned char hex_chars[4]) {
     return (hex_chars[2] << 4) + hex_chars[3];
 }
 
-void Emulator::unknown_opcode(const unsigned char hex_chars[4]) const {
+void Emulation::unknown_opcode(const unsigned char hex_chars[4]) const {
     std::stringstream ss;
-    ss << std::hex << (int)(hex_chars[0]) << (int)(hex_chars[1]) << (int)(hex_chars[2]) << (int)(hex_chars[3]);
+    ss << std::hex << static_cast<int>(hex_chars[0])
+                   << static_cast<int>(hex_chars[1])
+                   << static_cast<int>(hex_chars[2])
+                   << static_cast<int>(hex_chars[3]);
     log(MESSAGE_TYPE::INFO, "Unknown opcode: " + ss.str());
 }
