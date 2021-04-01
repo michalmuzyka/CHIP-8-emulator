@@ -42,7 +42,7 @@ namespace CHIP8
         std::ifstream program_file(path, std::ios::in | std::ios::binary);
 
         if (!program_file.is_open()) {
-            log(MESSAGE_TYPE::ERROR, "Can't open program file");
+            log(MESSAGE_TYPE::LOG_ERROR, "Can't open program file");
             return false;
         }
 
@@ -54,7 +54,7 @@ namespace CHIP8
             last_instruction_addr += 2;
             if (last_instruction_addr == RAM_SIZE) {
                 last_instruction_addr = 0x200;
-                log(MESSAGE_TYPE::ERROR, "File is too big to load");
+                log(MESSAGE_TYPE::LOG_ERROR, "File is too big to load");
                 return false;
             }
         }
@@ -114,7 +114,7 @@ namespace CHIP8
             window.clear();
         else if (hex_chars[1] == 0x0 && hex_chars[2] == 0xE && hex_chars[3] == 0xE) { //00EE, return from subroutine
             if (stack.empty())
-                log(MESSAGE_TYPE::ERROR, "CANNOT RETURN FROM SUBROUTINE");
+                log(MESSAGE_TYPE::LOG_ERROR, "CANNOT RETURN FROM SUBROUTINE");
             PC = stack.top();
             stack.pop();
         }
@@ -293,7 +293,7 @@ namespace CHIP8
             << static_cast<int>(hex_chars[1])
             << static_cast<int>(hex_chars[2])
             << static_cast<int>(hex_chars[3]);
-        log(MESSAGE_TYPE::INFO, "Unknown opcode: " + ss.str());
+        log(MESSAGE_TYPE::LOG_INFO, "Unknown opcode: " + ss.str());
     }
 
 }

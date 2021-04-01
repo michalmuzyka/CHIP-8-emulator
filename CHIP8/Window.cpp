@@ -11,7 +11,7 @@ namespace CHIP8
         window.setFramerateLimit(300);
 
         if (!window.isOpen())
-            log(MESSAGE_TYPE::ERROR, "Error, unable to open a window");
+            log(MESSAGE_TYPE::LOG_ERROR, "Error, unable to open a window");
     }
 
     void Window::handle_events() {
@@ -64,7 +64,7 @@ namespace CHIP8
         board_texture.clear(background_color);
 
         if (!buzz_buffer.loadFromFile("buzz.wav"))
-            log(MESSAGE_TYPE::ERROR, "CAN'T LOAD BUZZER SOUND");
+            log(MESSAGE_TYPE::LOG_ERROR, "CAN'T LOAD BUZZER SOUND");
 
         buzz_sound.setBuffer(buzz_buffer);
         buzz_sound.setLoop(false);
