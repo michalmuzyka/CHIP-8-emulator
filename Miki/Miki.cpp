@@ -1,7 +1,7 @@
 ﻿#define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
-#include "Window.h"
+#include "Window.hpp"
 #include "CHIP8/Emulation.hpp"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
