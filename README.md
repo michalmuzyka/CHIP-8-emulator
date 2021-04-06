@@ -13,3 +13,6 @@ Small launcher written in C++ and WinApi. It allows you to select a rom file and
 It requires the emulator to be compiled as library and linked to the project. 
 
 ![Image](coverphoto.png)
+
+### Credits
+ROM for test: https://github.com/corax89/chip8-test-rom
