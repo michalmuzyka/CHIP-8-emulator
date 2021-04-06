@@ -365,3 +365,7 @@ FodyWeavers.xsd
 /CHIP8/openal32.dll
 *.dll
 /Miki/ROMS
+*.vcxproj
+*.filters
+/Miki/log_file
+/CHIP8.sln

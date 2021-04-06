@@ -56,7 +56,7 @@ MikiWindow::MikiWindow(HINSTANCE hIns)
 }
 
 LRESULT MikiWindow::window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    MikiWindow* window = nullptr;
+    MikiWindow* window { nullptr };
     if (msg == WM_NCCREATE) {
         const LPCREATESTRUCTW pcs = reinterpret_cast<LPCREATESTRUCTW>(lParam);
         window = static_cast<MikiWindow*>(pcs->lpCreateParams);
@@ -78,10 +78,10 @@ LRESULT MikiWindow::window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 LRESULT MikiWindow::window_proc(UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg){
-        case WM_CREATE: {
+        case WM_CREATE:
             set_appearance();
             create_buttons();
-        } break;
+            break;
         case WM_COMMAND: 
             handle_gui_behaviour(LOWORD(wParam));
             break;
