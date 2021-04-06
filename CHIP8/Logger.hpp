@@ -20,13 +20,13 @@ namespace CHIP8
     static void log(MESSAGE_TYPE type, const std::string& message, std::string logfile_pathname = "log_file") {
         std::ostream* out_stream;
 
-#ifdef _DEBUG
-        out_stream = &std::clog;
-#else
+//#ifdef _DEBUG
+//        out_stream = &std::clog;
+//#else
         std::ofstream logfile(logfile_pathname, std::ios::out | std::ios::app);
         if (!logfile.is_open()) return;
         out_stream = &logfile;
-#endif
+//#endif
 
         const auto now = std::chrono::system_clock::now();
         auto now_in_time_t = std::chrono::system_clock::to_time_t(now);

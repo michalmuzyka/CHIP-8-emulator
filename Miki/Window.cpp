@@ -1,5 +1,5 @@
 #include "Window.hpp"
-#include <tuple>
+#include <thread>
 #include "CHIP8/Emulation.hpp"
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' "\
 "version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"") //enabling win10 visual styles
@@ -18,7 +18,7 @@ void MikiWindow::register_class(LPCWSTR cName) const{
     wcx.hbrBackground = static_cast<HBRUSH>(GetStockObject(WHITE_BRUSH));
     wcx.lpszClassName = cName;
     if(!RegisterClassExW(&wcx))
-        CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR,"WinAPI window class cannot be registered, error code: " + std::to_string(GetLastError()));
+        CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR,"WinAPI window class, error code: " + std::to_string(GetLastError()));
 }
 
 void MikiWindow::set_appearance() const{
@@ -33,11 +33,11 @@ void MikiWindow::set_appearance() const{
 
 void MikiWindow::create_buttons() {
     for (auto& data : controls) {
-        data.hwnd = CreateWindowExW(0, data.class_name, data.name, data.styles, data.pos_x, data.pos_y, data.width, data.height, my_hwnd, reinterpret_cast<HMENU>(ID_RUN), hInstance, nullptr);
+        data.hwnd = CreateWindowExW(0, data.class_name, data.name, data.styles, data.pos_x, data.pos_y, data.width, data.height, my_hwnd, data.id, hInstance, nullptr);
 
         if (!data.hwnd) 
-            CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR, "WinAPI button cannot be initialized, error code: " + std::to_string(GetLastError()));
-        else
+            CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR, "WinAPI button init, error code: " + std::to_string(GetLastError()));
+        else 
             SendMessageW(data.hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), true);
 
         if(data.id == reinterpret_cast<HMENU>(ID_TEXTBOX))
@@ -52,7 +52,7 @@ MikiWindow::MikiWindow(HINSTANCE hIns)
         register_class(class_name.c_str());
 
     if (!CreateWindowExW(0, class_name.c_str(), title.c_str(), main_window_styles, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, hInstance, reinterpret_cast<LPVOID>(this))) 
-     CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR, "WinAPI window cannot be initialized, error code: " + std::to_string(GetLastError()));
+        CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR, "WinAPI window init, error code: " + std::to_string(GetLastError()));
 }
 
 LRESULT MikiWindow::window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -82,9 +82,13 @@ LRESULT MikiWindow::window_proc(UINT msg, WPARAM wParam, LPARAM lParam) {
             set_appearance();
             create_buttons();
         } break;
+        case WM_COMMAND: 
+            handle_gui_behaviour(LOWORD(wParam));
+            break;
         case WM_CTLCOLORSTATIC:
             return reinterpret_cast<LRESULT>(GetStockObject(HOLLOW_BRUSH));
         case WM_CLOSE:
+            stop_emulation();
             DestroyWindow(my_hwnd);
             return 0;
         case WM_DESTROY:
@@ -95,7 +99,51 @@ LRESULT MikiWindow::window_proc(UINT msg, WPARAM wParam, LPARAM lParam) {
     return DefWindowProcW(my_hwnd, msg, wParam, lParam);
 }
 
+void MikiWindow::handle_gui_behaviour(DWORD id) {
+    switch (id) {
+        case ID_RUN: start_emulation(); break;
+        case ID_STOP: stop_emulation(); break;
+        case ID_TEXTBOX: break;
+        case ID_BROWSE: {
+                OPENFILENAMEW filename;
+                memset(&filename, 0, sizeof(OPENFILENAMEW));
+                filename.hInstance = hInstance;
+                filename.lStructSize = sizeof(OPENFILENAMEW);
+                filename.lpstrDefExt = L"\0";
+                filename.hwndOwner = my_hwnd;
+                filename.lpstrFile = path;
+                filename.nMaxFile = MAX_PATH;
+                filename.lpstrTitle = L"Choose ROM file:";
+                filename.Flags = OFN_FILEMUSTEXIST;
+
+                if(GetOpenFileNameW(&filename))
+                  SetWindowTextW(textbox_hwnd, path);
+            } break;
+        default:
+            CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR, "Winapi wrong control ID");
+    }
+}
+
+void MikiWindow::start_emulation() {
+    if(emulation_running) return;
+    GetWindowTextW(textbox_hwnd, path, MAX_PATH);
+    emulation_running = true;
+    thread = std::thread([this]() {
+        CHIP8::Emulation emulation;
+        if (emulation.load_program_from_file(path))
+            emulation.emulate(std::ref(emulation_running));
+    });
+}
+
+void MikiWindow::stop_emulation() {
+    if(emulation_running){
+        emulation_running = false;
+        thread.join();
+    }
+}
+
 MikiWindow::~MikiWindow() {
+    stop_emulation();
     if (my_hwnd) DestroyWindow(my_hwnd);
     for (auto& data : controls)
         if(data.hwnd) DestroyWindow(data.hwnd);

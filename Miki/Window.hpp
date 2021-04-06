@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #define NOMINMAX
+#include <atomic>
+#include <thread>
 #include <vector>
 #include <Windows.h>
 #include "TableLayout.hpp"
@@ -22,24 +24,33 @@ struct ControlData {
 class MikiWindow
 {
 public:
-    static LRESULT window_proc(HWND, UINT, WPARAM, LPARAM); //window callback
-    LRESULT window_proc(UINT, WPARAM, LPARAM);
     MikiWindow(HINSTANCE);
     MikiWindow(const MikiWindow& window) = delete;
     MikiWindow& operator=(const MikiWindow& window) = delete;
     HWND operator()() const { return my_hwnd; }
     ~MikiWindow();
+
+    static LRESULT window_proc(HWND, UINT, WPARAM, LPARAM); //window callback
+    LRESULT window_proc(UINT, WPARAM, LPARAM);
+    void handle_gui_behaviour(DWORD);
 private:
     bool is_registered_class(LPCWSTR) const;
     void register_class(LPCWSTR) const;
     void set_appearance() const;
     void create_buttons();
+    void stop_emulation();
+    void start_emulation();
 
     HWND my_hwnd, textbox_hwnd;
     DWORD main_window_styles = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_THICKFRAME | WS_VISIBLE;
     HINSTANCE hInstance;
     std::wstring class_name = L"MyWindowClass";
     std::wstring title = L"Miki";
+    wchar_t path[MAX_PATH];
+
+    std::atomic_bool emulation_running{false};
+    std::thread thread;
+
     const static int ID_RUN = 101; 
     const static int ID_STOP = 102;
     const static int ID_BROWSE = 103;
@@ -55,6 +66,6 @@ private:
         {L"Button", L"Stop", table.col(1,0), table.row(-1.4), table.width(-1.2, 50), table.height(1), reinterpret_cast<HMENU>(ID_STOP), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON},
         {L"Button", L"Run", table.col(0.2, 50), table.row(-1.4), table.width(-1.2, 50), table.height(1), reinterpret_cast<HMENU>(ID_RUN), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON},
         {L"Button", L"Browse", table.col(1, 70), table.row(1.3), table.width(-2, 30), table.height(1), reinterpret_cast<HMENU>(ID_BROWSE), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON},
-        {L"Edit", L"", table.col(1, 0), table.row(1.3) + 1, table.width(0, 67), 23, reinterpret_cast<HMENU>(ID_TEXTBOX), WS_VISIBLE | WS_CHILD | WS_BORDER}
+        {L"Edit", L"", table.col(1, 0), table.row(1.3) + 1, table.width(0, 67), 23, reinterpret_cast<HMENU>(ID_TEXTBOX), WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL}
     };
 };

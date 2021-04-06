@@ -364,3 +364,4 @@ FodyWeavers.xsd
 *.ch8
 /CHIP8/openal32.dll
 *.dll
+/Miki/ROMS

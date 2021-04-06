@@ -7,22 +7,13 @@
 
 namespace CHIP8
 {
-    /*
-        std::atomic_bool stop(false);
-        auto f = std::async(std::launch::async, [&stop]() {
-        CHIP8::Emulation emulation;
-        emulation.load_program_from_file("ROMS/test_opcode.ch8");
-        emulation.emulate(std::ref(stop));
-        });
-    */
-
     class Emulation
     {
     public:
         Emulation();
 
-        bool load_program_from_file(const std::string& path);
-        void emulate(const std::atomic_bool& stop);
+        bool load_program_from_file(const std::wstring& path);
+        void emulate(std::atomic_bool& stop);
         void update();
 
     private:

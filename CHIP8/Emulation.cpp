@@ -35,14 +35,14 @@ namespace CHIP8
         window.link_keyboard(&keyboard);
     }
 
-    bool Emulation::load_program_from_file(const std::string& path) {
+    bool Emulation::load_program_from_file(const std::wstring& path) {
         PC = 0x200;
         last_instruction_addr = 0x200;
 
         std::ifstream program_file(path, std::ios::in | std::ios::binary);
 
         if (!program_file.is_open()) {
-            log(MESSAGE_TYPE::LOG_ERROR, "Can't open program file");
+            log(MESSAGE_TYPE::LOG_WARNING, "Can't open program file");
             return false;
         }
 
@@ -70,10 +70,9 @@ namespace CHIP8
             execute_current_line();
     }
 
-    void Emulation::emulate(const std::atomic_bool& stop) {
+    void Emulation::emulate(std::atomic_bool& running) {
         window.open();
-
-        while (!stop && window.is_open()) {
+        while (running && window.is_open()) {
             window.handle_events();
             update();
             window.display();
