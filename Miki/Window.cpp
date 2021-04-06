@@ -104,21 +104,7 @@ void MikiWindow::handle_gui_behaviour(DWORD id) {
         case ID_RUN: start_emulation(); break;
         case ID_STOP: stop_emulation(); break;
         case ID_TEXTBOX: break;
-        case ID_BROWSE: {
-                OPENFILENAMEW filename;
-                memset(&filename, 0, sizeof(OPENFILENAMEW));
-                filename.hInstance = hInstance;
-                filename.lStructSize = sizeof(OPENFILENAMEW);
-                filename.lpstrDefExt = L"\0";
-                filename.hwndOwner = my_hwnd;
-                filename.lpstrFile = path;
-                filename.nMaxFile = MAX_PATH;
-                filename.lpstrTitle = L"Choose ROM file:";
-                filename.Flags = OFN_FILEMUSTEXIST;
-
-                if(GetOpenFileNameW(&filename))
-                  SetWindowTextW(textbox_hwnd, path);
-            } break;
+        case ID_BROWSE: browse_file(); break;
         default:
             CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR, "Winapi wrong control ID");
     }
@@ -133,6 +119,22 @@ void MikiWindow::start_emulation() {
         if (emulation.load_program_from_file(path))
             emulation.emulate(std::ref(emulation_running));
     });
+}
+
+void MikiWindow::browse_file() {
+    OPENFILENAMEW filename;
+    memset(&filename, 0, sizeof(OPENFILENAMEW));
+    filename.hInstance = hInstance;
+    filename.lStructSize = sizeof(OPENFILENAMEW);
+    filename.lpstrDefExt = L"\0";
+    filename.hwndOwner = my_hwnd;
+    filename.lpstrFile = path;
+    filename.nMaxFile = MAX_PATH;
+    filename.lpstrTitle = L"Choose ROM file:";
+    filename.Flags = OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+    if (GetOpenFileNameW(&filename))
+        SetWindowTextW(textbox_hwnd, path);
 }
 
 void MikiWindow::stop_emulation() {

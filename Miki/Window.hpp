@@ -40,6 +40,7 @@ private:
     void create_buttons();
     void stop_emulation();
     void start_emulation();
+    void browse_file();
 
     HWND my_hwnd, textbox_hwnd;
     DWORD main_window_styles = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_THICKFRAME | WS_VISIBLE;
