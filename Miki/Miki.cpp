@@ -17,7 +17,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     BOOL gmResult;
     while ((gmResult = GetMessageW(&msg, nullptr, 0, 0)) != 0) {
         if (gmResult == -1)
-            CHIP8::log(CHIP8::MESSAGE_TYPE::LOG_ERROR, "Winapi error code: " + std::to_string(GetLastError()));
+            CHIP8::log(CHIP8::LOG_ERROR, "Winapi error code: " + std::to_string(GetLastError()));
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
     }

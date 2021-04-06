@@ -1,4 +1,4 @@
-#include "Settings.hpp"
+    #include "Settings.hpp"
 #include <filesystem>
 #include <fstream>
 
@@ -26,14 +26,14 @@ namespace CHIP8
     void Settings::parse_config_file(const std::string& path) {
         namespace fs = std::filesystem;
         if (!fs::exists(path))
-            log(MESSAGE_TYPE::LOG_ERROR, path + " doesn't exist");
+            log(LOG_ERROR, path + " doesn't exist");
         if (!fs::is_regular_file(path))
-            log(MESSAGE_TYPE::LOG_ERROR, path + " is not a file");
+            log(LOG_ERROR, path + " is not a file");
 
         std::ifstream config_file(path);
 
         if (!config_file.is_open())
-            log(MESSAGE_TYPE::LOG_ERROR, path + " cannot be opened");
+            log(LOG_ERROR, path + " cannot be opened");
 
         std::string line;
         while (std::getline(config_file, line)) {

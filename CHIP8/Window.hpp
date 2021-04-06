@@ -3,8 +3,6 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Font.hpp>
-#include <SFML/Graphics/Text.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/Audio/Sound.hpp>
 #include "Keyboard.hpp"
@@ -32,7 +30,7 @@ namespace CHIP8
     class GameWindow :public Window
     {
     public:
-        GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size);
+        GameWindow(sf::Vector2i display_pixel_size);
 
         void open();
         void clear();

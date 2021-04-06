@@ -11,7 +11,7 @@ namespace CHIP8
         window.setFramerateLimit(300);
 
         if (!window.isOpen())
-            log(MESSAGE_TYPE::LOG_ERROR, "Error, unable to open a window");
+            log(LOG_ERROR, "SFML: Error, unable to open a window");
     }
 
     void Window::handle_events() {
@@ -46,7 +46,7 @@ namespace CHIP8
     }
 
 
-    GameWindow::GameWindow(const std::string& window_title, sf::Vector2i display_pixel_size)
+    GameWindow::GameWindow(sf::Vector2i display_pixel_size)
         :display_pixel_size{ display_pixel_size },
         drawn_pixels(display_pixel_size.y, std::vector<unsigned char>(display_pixel_size.x, 0))
     {
@@ -57,14 +57,12 @@ namespace CHIP8
         pixel_color = Settings::ins()->get_color("pixel_color");
         background_color = Settings::ins()->get_color("background_color");
 
-        board_texture.create(pixel_size.x* display_pixel_size.x, pixel_size.y* display_pixel_size.y);
-        board_texture.setSmooth(false);
-        board_texture.setRepeated(false);
+        board_texture.create(pixel_size.x * display_pixel_size.x, pixel_size.y * display_pixel_size.y);
         game_board.setPosition(0, 0);
         board_texture.clear(background_color);
 
-        if (!buzz_buffer.loadFromFile("buzz.wav"))
-            log(MESSAGE_TYPE::LOG_ERROR, "CAN'T LOAD BUZZER SOUND");
+        if (Settings::ins()->get_int("play_sound_effect") && !buzz_buffer.loadFromFile("buzz.wav"))
+            log(LOG_ERROR, "Emulator: Cannot load buzzer sound");
 
         buzz_sound.setBuffer(buzz_buffer);
         buzz_sound.setLoop(false);
@@ -75,7 +73,7 @@ namespace CHIP8
         const int width = pixel_size.x * display_pixel_size.x;
         const int height = pixel_size.y * display_pixel_size.y;
 
-        Window::open("CHIP_8 emulator", width, height);
+        Window::open("CHIP_8 emulation", width, height);
 
         const auto current_pos = window.getPosition();
         window.setPosition(sf::Vector2i{ current_pos.x + width / 2, current_pos.y });
@@ -93,7 +91,7 @@ namespace CHIP8
         unsigned char mask = 0b10000000;
 
         for (int i = 0; i < 8; ++i) {
-            unsigned char bit = (row & mask) >> (8 - 1 - i); // char is 8bit long
+            unsigned char bit = (row & mask) >> (CHAR_BIT - 1 - i); // char is 8bit long
             unsigned char x = (at.x + i) % display_pixel_size.x;
 
             if (drawn_pixels[y][x] == 1 && bit == 0)
@@ -122,7 +120,7 @@ namespace CHIP8
     void GameWindow::display() {
         if (!is_open()) return;
 
-        window.clear(sf::Color::Black);
+        window.clear(background_color);
         board_texture.display();
         game_board.setTexture(board_texture.getTexture());
         window.draw(game_board);

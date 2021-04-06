@@ -19,7 +19,7 @@ namespace CHIP8
     private:
         unsigned last_instruction_addr{ 0x200 };
 
-        static const unsigned RAM_SIZE = 4096;
+        static const unsigned RAM_SIZE { 4096 };
         unsigned char RAM[RAM_SIZE]{ 0 };
         unsigned char V[16]{ 0 };
         unsigned I{ 0 };
