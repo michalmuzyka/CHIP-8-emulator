@@ -6,6 +6,7 @@
 #include <vector>
 #include <Windows.h>
 #include "TableLayout.hpp"
+#include "Launcher.hpp"
 
 struct ControlData {
     HWND hwnd{nullptr};
@@ -34,12 +35,12 @@ public:
     LRESULT window_proc(UINT, WPARAM, LPARAM);
     void handle_gui_behaviour(DWORD);
 private:
+    Launcher launcher;
+
     bool is_registered_class(LPCWSTR) const;
     void register_class(LPCWSTR) const;
     void set_appearance() const;
     void create_buttons();
-    void stop_emulation();
-    void start_emulation();
     void browse_file();
 
     HWND my_hwnd, textbox_hwnd;
@@ -48,9 +49,6 @@ private:
     std::wstring class_name = L"MyWindowClass";
     std::wstring title = L"Miki";
     wchar_t path[MAX_PATH];
-
-    std::atomic_bool emulation_running{false};
-    std::thread thread;
 
     const static int ID_RUN = 101; 
     const static int ID_STOP = 102;

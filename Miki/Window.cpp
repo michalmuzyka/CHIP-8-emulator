@@ -37,9 +37,8 @@ void MikiWindow::create_buttons() {
 
         if (!data.hwnd) 
             CHIP8::log(CHIP8::LOG_ERROR, "WinApi: button init, error code: " + std::to_string(GetLastError()));
-        else 
-            SendMessageW(data.hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), true);
 
+        SendMessageW(data.hwnd, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), true);
         if(data.id == reinterpret_cast<HMENU>(ID_TEXTBOX))
             textbox_hwnd = data.hwnd;
     }
@@ -88,7 +87,7 @@ LRESULT MikiWindow::window_proc(UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_CTLCOLORSTATIC:
             return reinterpret_cast<LRESULT>(GetStockObject(HOLLOW_BRUSH));
         case WM_CLOSE:
-            stop_emulation();
+            launcher.stop_emulation();
             DestroyWindow(my_hwnd);
             return 0;
         case WM_DESTROY:
@@ -101,24 +100,16 @@ LRESULT MikiWindow::window_proc(UINT msg, WPARAM wParam, LPARAM lParam) {
 
 void MikiWindow::handle_gui_behaviour(DWORD id) {
     switch (id) {
-        case ID_RUN: start_emulation(); break;
-        case ID_STOP: stop_emulation(); break;
+        case ID_RUN: {
+                GetWindowTextW(textbox_hwnd, path, MAX_PATH);
+                launcher.start_emulation(path); 
+            } break;
+        case ID_STOP: launcher.stop_emulation(); break;
         case ID_TEXTBOX: break;
         case ID_BROWSE: browse_file(); break;
         default:
             CHIP8::log(CHIP8::LOG_ERROR, "WinApi: wrong control ID");
     }
-}
-
-void MikiWindow::start_emulation() {
-    if(emulation_running) return;
-    GetWindowTextW(textbox_hwnd, path, MAX_PATH);
-    emulation_running = true;
-    thread = std::thread([this]() {
-        CHIP8::Emulation emulation;
-        if (emulation.load_program_from_file(path))
-            emulation.emulate(std::ref(emulation_running));
-    });
 }
 
 void MikiWindow::browse_file() {
@@ -137,15 +128,9 @@ void MikiWindow::browse_file() {
         SetWindowTextW(textbox_hwnd, path);
 }
 
-void MikiWindow::stop_emulation() {
-    if(emulation_running){
-        emulation_running = false;
-        thread.join();
-    }
-}
 
 MikiWindow::~MikiWindow() {
-    stop_emulation();
+    launcher.stop_emulation();
     if (my_hwnd) DestroyWindow(my_hwnd);
     for (auto& data : controls)
         if(data.hwnd) DestroyWindow(data.hwnd);
