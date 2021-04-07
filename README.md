@@ -10,7 +10,6 @@ You should start emulation asynchronously in another thread, otherwise infinite 
 
 ## Miki launcher
 Small launcher written in C++ and WinApi. It allows you to select a rom file and run async emulation.
-It requires the emulator to be compiled as library and linked to the project. 
 
 ![Image](coverphoto.png)
 
